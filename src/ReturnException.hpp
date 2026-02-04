@@ -1,12 +1,13 @@
-#ifndef RETURNEXCEPTION_HPP
-#define RETURNEXCEPTION_HPP
+#ifndef LOX_RETURNEXCEPTION_HPP
+#define LOX_RETURNEXCEPTION_HPP
 
 #include <any>
 #include <stdexcept>
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
+namespace lox {
 
 // Return exception: Wapis jao! (Control flow hack)
 // (Return exception: Go back! The ultimate control flow hack)
@@ -17,4 +18,6 @@ public:
   ReturnException(std::any value) : std::runtime_error(""), value(value) {}
 };
 
-#endif // RETURNEXCEPTION_HPP
+} // namespace lox
+
+#endif // LOX_RETURNEXCEPTION_HPP
