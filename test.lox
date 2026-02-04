@@ -1,0 +1,12 @@
+var language = "Pinglish";
+print language;
+var score = 10;
+if (score > 5) {
+    print "Score is good";
+    print score + 5;
+}
+print "Math test:";
+print 2 * (3 + 5);
+var a = "Hello";
+var b = " World";
+print a + b;
