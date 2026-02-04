@@ -29,6 +29,10 @@ std::shared_ptr<Expr> Parser::parseExpression() {
 
 std::shared_ptr<Stmt> Parser::declaration() {
   try {
+    if (match({TokenType::CLASS}))
+      return classDeclaration();
+    if (match({TokenType::FUN}))
+      return function("function");
     if (match({TokenType::VAR}))
       return varDeclaration();
     return statement();
@@ -50,15 +54,40 @@ std::shared_ptr<Stmt> Parser::varDeclaration() {
   return std::make_shared<Var>(name, initializer);
 }
 
+std::shared_ptr<Stmt> Parser::function(std::string kind) {
+  Token name = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
+  consume(TokenType::LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+  std::vector<Token> parameters;
+  if (!check(TokenType::RIGHT_PAREN)) {
+    do {
+      if (parameters.size() >= 255) {
+        // error(peek(), "Can't have more than 255 parameters.");
+      }
+      parameters.push_back(
+          consume(TokenType::IDENTIFIER, "Expect parameter name."));
+    } while (match({TokenType::COMMA}));
+  }
+  consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+
+  consume(TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
+  std::vector<std::shared_ptr<Stmt>> body = block();
+  return std::make_shared<Function>(name, parameters, body);
+}
+
 // --- Statement Parsing ---
 
 std::shared_ptr<Stmt> Parser::statement() {
+  if (match({TokenType::FOR}))
+    return forStatement();
   if (match({TokenType::IF}))
     return ifStatement();
   if (match({TokenType::PRINT}))
     return printStatement();
   if (match({TokenType::WHILE}))
     return whileStatement();
+  if (match({TokenType::RETURN}))
+    return returnStatement();
   if (match({TokenType::LEFT_BRACE}))
     return std::make_shared<Block>(block());
 
@@ -93,6 +122,98 @@ std::shared_ptr<Stmt> Parser::whileStatement() {
   return std::make_shared<While>(condition, body);
 }
 
+std::shared_ptr<Stmt> Parser::forStatement() {
+  consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+  std::shared_ptr<Stmt> initializer;
+  if (match({TokenType::SEMICOLON})) {
+    initializer = nullptr;
+  } else if (match({TokenType::VAR})) {
+    initializer = varDeclaration();
+  } else {
+    initializer = expressionStatement();
+  }
+
+  std::shared_ptr<Expr> condition = nullptr;
+  if (!check(TokenType::SEMICOLON)) {
+    condition = expression();
+  }
+  consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+  std::shared_ptr<Expr> increment = nullptr;
+  if (!check(TokenType::RIGHT_PAREN)) {
+    increment = expression();
+  }
+  consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+  std::shared_ptr<Stmt> body = statement();
+
+  // Desugaring: Convert for loop to while loop
+
+  // 1. Increment executes after body
+  if (increment != nullptr) {
+    std::vector<std::shared_ptr<Stmt>> statements;
+    statements.push_back(body);
+    statements.push_back(std::make_shared<Expression>(increment));
+    body = std::make_shared<Block>(statements);
+  }
+
+  // 2. Condition check
+  if (condition == nullptr) {
+    condition = std::make_shared<Literal>(true);
+  }
+  body = std::make_shared<While>(condition, body);
+
+  // 3. Initializer runs once before loop
+  if (initializer != nullptr) {
+    std::vector<std::shared_ptr<Stmt>> statements;
+    statements.push_back(initializer);
+    statements.push_back(body);
+    body = std::make_shared<Block>(statements);
+  }
+
+  return body;
+}
+
+std::shared_ptr<Stmt> Parser::classDeclaration() {
+  // Class da naam lo (Get the class name)
+  Token name = consume(TokenType::IDENTIFIER, "Expect class name.");
+
+  // Inheritance check karo (Check for inheritance)
+  // Syntax: class Dog < Animal { ... }
+  std::shared_ptr<Variable> superclass = nullptr;
+  if (match({TokenType::LESS})) {
+    consume(TokenType::IDENTIFIER, "Expect superclass name.");
+    superclass = std::make_shared<Variable>(previous());
+  }
+
+  consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
+
+  // Methods parse karo (Parse methods)
+  std::vector<std::shared_ptr<Function>> methods;
+  while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+    std::shared_ptr<Stmt> methodStmt = function("method");
+    if (auto method = std::dynamic_pointer_cast<Function>(methodStmt)) {
+      methods.push_back(method);
+    }
+  }
+
+  consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+
+  return std::make_shared<Class>(name, superclass, methods);
+}
+
+std::shared_ptr<Stmt> Parser::returnStatement() {
+  Token keyword = previous();
+  std::shared_ptr<Expr> value = nullptr;
+  if (!check(TokenType::SEMICOLON)) {
+    value = expression();
+  }
+
+  consume(TokenType::SEMICOLON, "Expect ';' after return value.");
+  return std::make_shared<Return>(keyword, value);
+}
+
 std::vector<std::shared_ptr<Stmt>> Parser::block() {
   std::vector<std::shared_ptr<Stmt>> statements;
 
@@ -125,6 +246,8 @@ std::shared_ptr<Expr> Parser::assignment() {
     if (auto varExpr = std::dynamic_pointer_cast<Variable>(expr)) {
       Token name = varExpr->name;
       return std::make_shared<Assign>(name, value);
+    } else if (auto getExpr = std::dynamic_pointer_cast<Get>(expr)) {
+      return std::make_shared<Set>(getExpr->object, getExpr->name, value);
     }
 
     error(equals, "Invalid assignment target.");
@@ -222,6 +345,10 @@ std::shared_ptr<Expr> Parser::call() {
   while (true) {
     if (match({TokenType::LEFT_PAREN})) {
       expr = finishCall(expr);
+    } else if (match({TokenType::DOT})) {
+      Token name =
+          consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+      expr = std::make_shared<Get>(expr, name);
     } else {
       break;
     }
@@ -262,10 +389,24 @@ std::shared_ptr<Expr> Parser::primary() {
     return std::make_shared<Variable>(previous());
   }
 
+  if (match({TokenType::THIS})) {
+    return std::make_shared<This>(previous());
+  }
+
   if (match({TokenType::LEFT_PAREN})) {
     std::shared_ptr<Expr> expr = expression();
     consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
     return std::make_shared<Grouping>(expr);
+  }
+
+  // Super keyword for inheritance (Virassat layi super)
+  // Syntax: super.method()
+  if (match({TokenType::SUPER})) {
+    Token keyword = previous();
+    consume(TokenType::DOT, "Expect '.' after 'super'.");
+    Token method =
+        consume(TokenType::IDENTIFIER, "Expect superclass method name.");
+    return std::make_shared<Super>(keyword, method);
   }
 
   throw error(peek(), "Expect expression.");

@@ -1,0 +1,71 @@
+print "==============================";
+print "Testing Inheritance (Virassat)";
+print "==============================";
+
+// Base class (Mool class)
+class Animal {
+  speak() {
+    print "The animal makes a sound";
+  }
+}
+
+// Subclass inheriting from Animal (Animal ton virassat lendi class)
+class Dog < Animal {
+  speak() {
+    print "Woof! Woof!";
+  }
+  
+  fetch() {
+    print "Dog fetches the ball!";
+  }
+}
+
+print "Creating Dog instance:";
+var dog = Dog();
+dog.speak();
+dog.fetch();
+
+print "";
+print "Testing super keyword:";
+
+class Cat < Animal {
+  speak() {
+    super.speak();
+    print "Meow!";
+  }
+}
+
+var cat = Cat();
+cat.speak();
+
+print "";
+print "Testing method inheritance:";
+
+class Bird < Animal {
+  fly() {
+    print "Bird is flying!";
+  }
+}
+
+var bird = Bird();
+bird.speak();  // Inherited from Animal
+bird.fly();
+
+print "";
+print "Testing multi-level inheritance:";
+
+class Parrot < Bird {
+  talk() {
+    print "Parrot says hello!";
+  }
+}
+
+var parrot = Parrot();
+parrot.speak();  // From Animal
+parrot.fly();    // From Bird
+parrot.talk();   // From Parrot
+
+print "";
+print "==============================";
+print "All inheritance tests passed!";
+print "==============================";

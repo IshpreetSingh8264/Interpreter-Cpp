@@ -1,0 +1,41 @@
+print "Clock:";
+print clock();
+
+print "Function call:";
+fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
+}
+
+sayHi("Dear", "User");
+
+print "Return value:";
+fun add(a, b) {
+  return a + b;
+}
+
+print add(10, 20);
+
+print "Recursion (Fibonacci):";
+fun fib(n) {
+  if (n <= 1) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+for (var i = 0; i < 10; i = i + 1) {
+  print fib(i);
+}
+
+print "Closure:";
+fun makeCounter() {
+  var i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
+  }
+
+  return count;
+}
+
+var counter = makeCounter();
+counter();
+counter();

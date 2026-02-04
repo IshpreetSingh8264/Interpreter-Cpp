@@ -9,6 +9,7 @@
 #include <vector>
 
 // Parser class: Tokens nu AST (rukh) vich badlan wala
+// (Parser class: The guy converting tokens into an AST (Tree))
 class Parser {
 public:
   // Error class definition (Standard Lox error exception)
@@ -31,9 +32,11 @@ public:
 
 private:
   // Grammar Rules (Niyam)
+  // (Grammar Rules: The Laws of the Land)
 
   // Declarations
   std::shared_ptr<Stmt> declaration();
+  std::shared_ptr<Stmt> classDeclaration();
   std::shared_ptr<Stmt> varDeclaration();
   std::shared_ptr<Stmt> function(std::string kind);
 
@@ -62,6 +65,7 @@ private:
   std::shared_ptr<Expr> finishCall(std::shared_ptr<Expr> callee);
 
   // Helpers (Sahayak)
+  // (Helpers: The sidekicks)
   bool match(const std::vector<TokenType> &types);
   bool check(TokenType type);
   Token advance();

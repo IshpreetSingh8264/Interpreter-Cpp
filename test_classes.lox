@@ -1,0 +1,35 @@
+print "Testing Classes:";
+
+class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
+  }
+}
+
+print Bacon;
+
+var bacon = Bacon();
+print bacon;
+bacon.eat();
+
+print "Testing properties:"; 
+
+class Circle {
+  init(radius) {
+    this.radius = radius;
+  }
+  
+  area() {
+    return 3.14159 * this.radius * this.radius;
+  }
+}
+
+var circle = Circle(5);
+print circle.radius;
+print circle.area();
+
+print "Setting property:";
+circle.radius = 10;
+print circle.area();
+
+print "Done!";

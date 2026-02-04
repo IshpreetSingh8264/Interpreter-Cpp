@@ -10,9 +10,13 @@
 class Assign;
 class Binary;
 class Call;
+class Get;
 class Grouping;
 class Literal;
 class Logical;
+class Set;
+class Super;
+class This;
 class Unary;
 class Variable;
 
@@ -22,15 +26,20 @@ public:
   virtual std::any visitAssignExpr(Assign &expr) = 0;
   virtual std::any visitBinaryExpr(Binary &expr) = 0;
   virtual std::any visitCallExpr(Call &expr) = 0;
+  virtual std::any visitGetExpr(Get &expr) = 0;
   virtual std::any visitGroupingExpr(Grouping &expr) = 0;
   virtual std::any visitLiteralExpr(Literal &expr) = 0;
   virtual std::any visitLogicalExpr(Logical &expr) = 0;
+  virtual std::any visitSetExpr(Set &expr) = 0;
+  virtual std::any visitSuperExpr(Super &expr) = 0;
+  virtual std::any visitThisExpr(This &expr) = 0;
   virtual std::any visitUnaryExpr(Unary &expr) = 0;
   virtual std::any visitVariableExpr(Variable &expr) = 0;
   virtual ~ExprVisitor() = default;
 };
 
 // Base Expression class (Sab da baap)
+// (Base Expression class: The father of them all)
 class Expr {
 public:
   virtual std::any accept(ExprVisitor &visitor) = 0;
@@ -38,6 +47,7 @@ public:
 };
 
 // Subclasses (Bache)
+// (Subclasses: The kids)
 
 class Binary : public Expr {
 public:
@@ -136,6 +146,55 @@ public:
 
   std::any accept(ExprVisitor &visitor) override {
     return visitor.visitCallExpr(*this);
+  }
+};
+
+class Get : public Expr {
+public:
+  std::shared_ptr<Expr> object;
+  Token name;
+
+  Get(std::shared_ptr<Expr> object, Token name) : object(object), name(name) {}
+
+  std::any accept(ExprVisitor &visitor) override {
+    return visitor.visitGetExpr(*this);
+  }
+};
+
+class Set : public Expr {
+public:
+  std::shared_ptr<Expr> object;
+  Token name;
+  std::shared_ptr<Expr> value;
+
+  Set(std::shared_ptr<Expr> object, Token name, std::shared_ptr<Expr> value)
+      : object(object), name(name), value(value) {}
+
+  std::any accept(ExprVisitor &visitor) override {
+    return visitor.visitSetExpr(*this);
+  }
+};
+
+class This : public Expr {
+public:
+  Token keyword;
+
+  This(Token keyword) : keyword(keyword) {}
+
+  std::any accept(ExprVisitor &visitor) override {
+    return visitor.visitThisExpr(*this);
+  }
+};
+
+class Super : public Expr {
+public:
+  Token keyword;
+  Token method;
+
+  Super(Token keyword, Token method) : keyword(keyword), method(method) {}
+
+  std::any accept(ExprVisitor &visitor) override {
+    return visitor.visitSuperExpr(*this);
   }
 };
 

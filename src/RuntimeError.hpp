@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 // Runtime Error: Chladay hoye panga pe gya!
+// (Runtime Error: Trouble while running! Panic mode on!)
 class RuntimeError : public std::runtime_error {
 public:
   const Token token;

@@ -9,23 +9,28 @@
 #include "TokenType.hpp"
 
 // Main function: Tokens scan karo!
+// (Main function: Scan those tokens!)
 std::vector<Token> Scanner::scanTokens() {
   // Jeb tak end tak nahi pahunche, scan karde raho
+  // (Keep scanning until we hit the end of the road)
   while (!isAtEnd()) {
     start = current; // Nawa token shuru
     scanToken();
   }
 
   // Akhir vich EOF token pa do
+  // (Slap an EOF token at the end)
   tokens.emplace_back(TokenType::END_OF_FILE, "", std::any(), line);
   return tokens;
 }
 
 // Helper: Ikalla token scan karo
+// (Helper: Scan a single token)
 void Scanner::scanToken() {
   char c = advance();
   switch (c) {
   // Single-character tokens (Ikalle bande)
+  // (Lone wolves)
   case '(':
     addToken(TokenType::LEFT_PAREN);
     break;
@@ -58,6 +63,7 @@ void Scanner::scanToken() {
     break;
 
   // Two-character tokens (Do bande)
+  // (Dynamic duos)
   case '!':
     addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
     break;
@@ -72,9 +78,11 @@ void Scanner::scanToken() {
     break;
 
   // Slash handling (Comment hai ya Divide?)
+  // (Slash handling: Is it a comment or a division? The suspense!)
   case '/':
     if (match('/')) {
       // Comment labh gya! Line de end tak ignore karo.
+      // (Found a comment! Ignore everything till the end of the line.)
       while (peek() != '\n' && !isAtEnd())
         advance();
     } else {
@@ -83,10 +91,12 @@ void Scanner::scanToken() {
     break;
 
   // Whitespace (Vella time/space)
+  // (Free time/space, just chilling)
   case ' ':
   case '\r':
   case '\t':
     // Ignore maaro
+    // (Just ignore it like your ex's texts)
     break;
 
   case '\n':
@@ -94,6 +104,7 @@ void Scanner::scanToken() {
     break;
 
   // String literals (Text da maal)
+  // (String literals: The textual goods)
   case '"':
     string();
     break;
@@ -105,10 +116,12 @@ void Scanner::scanToken() {
       identifier();
     } else {
       // Error! Galt character aa gya.
+      // (Error! Wrong character entered the chat.)
       // Codecrafters expects error message on stderr
       std::cerr << "[line " << line << "] Error: Unexpected character: " << c
                 << std::endl;
       hasError = true; // Error flag set kardo
+                       // (Set the error flag, mission failed successfully)
     }
     break;
   }
@@ -116,9 +129,11 @@ void Scanner::scanToken() {
 
 // Helpers implementation
 // Agge wadho
+// (Move forward!)
 char Scanner::advance() { return source.at(current++); }
 
 // Token add karo list vich
+// (Add token to the list)
 void Scanner::addToken(TokenType type) { addToken(type, std::any()); }
 
 void Scanner::addToken(TokenType type, std::any literal) {
@@ -127,6 +142,7 @@ void Scanner::addToken(TokenType type, std::any literal) {
 }
 
 // Match checker: Agla character match karda hai?
+// (Match checker: Does the next character match? Consistency is key!)
 bool Scanner::match(char expected) {
   if (isAtEnd())
     return false;
@@ -134,10 +150,13 @@ bool Scanner::match(char expected) {
     return false;
 
   current++; // Match ho gya, agge wadho
+             // (Matched! Move forward!)
   return true;
 }
 
 // Peek helper: Agla character dekho bina agge wadhe
+// (Peek helper: Look at the next character without moving forward. Sneaky
+// peeky!)
 char Scanner::peek() {
   if (isAtEnd())
     return '\0';
@@ -145,6 +164,7 @@ char Scanner::peek() {
 }
 
 // Peek Next: Us ton agla character dekho
+// (Peek Next: Look at the character after the next one. Future vision!)
 char Scanner::peekNext() {
   if (current + 1 >= source.length())
     return '\0';
@@ -152,11 +172,13 @@ char Scanner::peekNext() {
 }
 
 // End check: Khatam ho gya?
+// (End check: Is it over yet?)
 bool Scanner::isAtEnd() { return current >= source.length(); }
 
 // String scanner
 void Scanner::string() {
   // Jab tak closing quote nahi milda
+  // (Until we find the closing quote)
   while (peek() != '"' && !isAtEnd()) {
     if (peek() == '\n')
       line++;
@@ -174,6 +196,7 @@ void Scanner::string() {
   advance();
 
   // Value extract karo (quotes hata ke)
+  // (Extract the value, strip the quotes)
   std::string value = source.substr(start + 1, current - start - 2);
   addToken(TokenType::STRING, value);
 }
@@ -184,16 +207,20 @@ void Scanner::number() {
     advance();
 
   // Fractional part dekho
+  // (Check for the fractional part, if any)
   if (peek() == '.' && isdigit(peekNext())) {
     // Dot nu consume karo
+    // (Consume the dot, nom nom)
     advance();
 
     // Decimal de baad wale digits
+    // (Digits after the decimal)
     while (isdigit(peek()))
       advance();
   }
 
   // Value extract karo te double banao
+  // (Extract value and make it a double)
   std::string numStr = source.substr(start, current - start);
   addToken(TokenType::NUMBER, std::stod(numStr));
 }
@@ -207,6 +234,7 @@ void Scanner::identifier() {
   TokenType type;
 
   // Check karo keyword hai ya identifier
+  // (Check if it's a keyword or just an identifier)
   auto it = keywords.find(text);
   if (it != keywords.end()) {
     type = it->second;

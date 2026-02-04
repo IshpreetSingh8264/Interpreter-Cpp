@@ -9,6 +9,7 @@
 
 // Forward declarations
 class Block;
+class Class;
 class Expression;
 class Function;
 class If;
@@ -18,9 +19,11 @@ class Var;
 class While;
 
 // Visitor Interface: Har statement nu milan da tarika
+// (Visitor Interface: The protocol for meeting every statement)
 class StmtVisitor {
 public:
   virtual std::any visitBlockStmt(Block &stmt) = 0;
+  virtual std::any visitClassStmt(Class &stmt) = 0;
   virtual std::any visitExpressionStmt(Expression &stmt) = 0;
   virtual std::any visitFunctionStmt(Function &stmt) = 0;
   virtual std::any visitIfStmt(If &stmt) = 0;
@@ -32,6 +35,7 @@ public:
 };
 
 // Base Statement class (Hukam da baap)
+// (Base Statement class: The father of commands)
 class Stmt {
 public:
   virtual std::any accept(StmtVisitor &visitor) = 0;
@@ -39,6 +43,7 @@ public:
 };
 
 // Subclasses (Vakhre vakhre hukam)
+// (Subclasses: different different orders)
 
 class Block : public Stmt {
 public:
@@ -60,6 +65,21 @@ public:
 
   std::any accept(StmtVisitor &visitor) override {
     return visitor.visitExpressionStmt(*this);
+  }
+};
+
+class Class : public Stmt {
+public:
+  Token name;
+  std::shared_ptr<Variable> superclass; // Inheritance
+  std::vector<std::shared_ptr<Function>> methods;
+
+  Class(Token name, std::shared_ptr<Variable> superclass,
+        std::vector<std::shared_ptr<Function>> methods)
+      : name(name), superclass(superclass), methods(methods) {}
+
+  std::any accept(StmtVisitor &visitor) override {
+    return visitor.visitClassStmt(*this);
   }
 };
 

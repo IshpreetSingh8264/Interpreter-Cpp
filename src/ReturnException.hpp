@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 // Return exception: Wapis jao! (Control flow hack)
+// (Return exception: Go back! The ultimate control flow hack)
 class ReturnException : public std::runtime_error {
 public:
   std::any value;
