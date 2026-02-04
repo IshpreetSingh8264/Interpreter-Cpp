@@ -29,8 +29,10 @@ void Resolver::declare(Token name) {
 
   std::map<std::string, bool> &scope = scopes.back();
   if (scope.count(name.lexeme)) {
-    std::cerr << "Error: Variable " << name.lexeme
-              << " already declared in this scope." << std::endl;
+    std::cerr << "[line " << name.line << "] Error at '" << name.lexeme
+              << "': Already a variable with this name in this scope."
+              << std::endl;
+    hadError = true;
   }
 
   scope[name.lexeme] = false;
@@ -95,6 +97,10 @@ std::any Resolver::visitFunctionStmt(Function &stmt) {
   declare(stmt.name);
   define(stmt.name);
 
+  // Save current function context
+  FunctionType enclosingFunction = currentFunction;
+  currentFunction = FunctionType::FUNCTION;
+
   beginScope();
   for (const auto &param : stmt.params) {
     declare(param);
@@ -102,6 +108,9 @@ std::any Resolver::visitFunctionStmt(Function &stmt) {
   }
   resolve(stmt.body);
   endScope();
+
+  // Restore function context
+  currentFunction = enclosingFunction;
   return std::any();
 }
 
@@ -126,7 +135,23 @@ std::any Resolver::visitPrintStmt(Print &stmt) {
 }
 
 std::any Resolver::visitReturnStmt(Return &stmt) {
+  // Check if we're inside a function
+  if (currentFunction == FunctionType::NONE) {
+    std::cerr << "[line " << stmt.keyword.line
+              << "] Error at 'return': Can't return from top-level code."
+              << std::endl;
+    hadError = true;
+  }
+
   if (stmt.value != nullptr) {
+    // Check if we're returning value from initializer
+    if (currentFunction == FunctionType::INITIALIZER) {
+      std::cerr
+          << "[line " << stmt.keyword.line
+          << "] Error at 'return': Can't return a value from an initializer."
+          << std::endl;
+      hadError = true;
+    }
     resolve(stmt.value);
   }
   return std::any();
@@ -171,16 +196,25 @@ std::any Resolver::visitUnaryExpr(Unary &expr) {
 }
 
 std::any Resolver::visitClassStmt(Class &stmt) {
+  // Save current class context
+  ClassType enclosingClass = currentClass;
+  currentClass = ClassType::CLASS;
+
   // Class da naam declare karo (Declare the class name)
   declare(stmt.name);
   define(stmt.name);
 
   // Agar superclass hai ta resolve karo (If there's a superclass, resolve it)
   if (stmt.superclass != nullptr) {
+    currentClass = ClassType::SUBCLASS;
+
     // Check: class apne aap ton inherit nahi kar sakdi
     // (A class cannot inherit from itself)
     if (stmt.name.lexeme == stmt.superclass->name.lexeme) {
-      std::cerr << "Error: A class can't inherit from itself." << std::endl;
+      std::cerr << "[line " << stmt.superclass->name.line << "] Error at '"
+                << stmt.superclass->name.lexeme
+                << "': A class can't inherit from itself." << std::endl;
+      hadError = true;
     }
     resolve(std::make_shared<Variable>(stmt.superclass->name));
   }
@@ -198,6 +232,14 @@ std::any Resolver::visitClassStmt(Class &stmt) {
 
   // Har method resolve karo (Resolve each method)
   for (const auto &method : stmt.methods) {
+    FunctionType declaration = FunctionType::METHOD;
+    if (method->name.lexeme == "init") {
+      declaration = FunctionType::INITIALIZER;
+    }
+
+    FunctionType enclosingFunction = currentFunction;
+    currentFunction = declaration;
+
     beginScope();
     for (const auto &param : method->params) {
       declare(param);
@@ -205,6 +247,8 @@ std::any Resolver::visitClassStmt(Class &stmt) {
     }
     resolve(method->body);
     endScope();
+
+    currentFunction = enclosingFunction;
   }
 
   endScope(); // "this" scope band karo
@@ -214,6 +258,8 @@ std::any Resolver::visitClassStmt(Class &stmt) {
     endScope();
   }
 
+  // Restore class context
+  currentClass = enclosingClass;
   return std::any();
 }
 
@@ -229,11 +275,32 @@ std::any Resolver::visitSetExpr(Set &expr) {
 }
 
 std::any Resolver::visitThisExpr(This &expr) {
+  // Check if 'this' is used outside of a class
+  if (currentClass == ClassType::NONE) {
+    std::cerr << "[line " << expr.keyword.line
+              << "] Error at 'this': Can't use 'this' outside of a class."
+              << std::endl;
+    hadError = true;
+  }
   resolveLocal(&expr, expr.keyword);
   return std::any();
 }
 
 std::any Resolver::visitSuperExpr(Super &expr) {
+  // Check if 'super' is used outside of a class
+  if (currentClass == ClassType::NONE) {
+    std::cerr << "[line " << expr.keyword.line
+              << "] Error at 'super': Can't use 'super' outside of a class."
+              << std::endl;
+    hadError = true;
+  } else if (currentClass != ClassType::SUBCLASS) {
+    std::cerr << "[line " << expr.keyword.line
+              << "] Error at 'super': Can't use 'super' in a class with no "
+                 "superclass."
+              << std::endl;
+    hadError = true;
+  }
+
   // "super" keyword nu resolve karo (Resolve the "super" keyword)
   resolveLocal(&expr, expr.keyword);
   return std::any();

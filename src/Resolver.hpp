@@ -8,12 +8,19 @@
 #include <string>
 #include <vector>
 
+// FunctionType enum for tracking current function context
+enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
+
+// ClassType enum for tracking current class context
+enum class ClassType { NONE, CLASS, SUBCLASS };
+
 // Resolver: Static analysis pass (Rasta labho)
 // (Resolver: Find the path!)
 class Resolver : public ExprVisitor, public StmtVisitor {
   Interpreter &interpreter;
   std::vector<std::map<std::string, bool>> scopes;
-  // Current function type check (Top Level, Function, etc.) - Future
+  FunctionType currentFunction = FunctionType::NONE;
+  ClassType currentClass = ClassType::NONE;
 
 public:
   bool hadError = false; // Error flag for compile-time errors
