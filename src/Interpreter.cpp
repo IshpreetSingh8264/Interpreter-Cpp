@@ -12,15 +12,16 @@
 
 #include <ctime>
 
-// Native clock function
-// (Native clock function: Time is ticking!)
+// Native clock function - Returns Unix timestamp
+// (Native clock function: Returns the current time as Unix timestamp!)
 class Clock : public LoxCallable {
 public:
   int arity() override { return 0; }
 
   std::any call(Interpreter &interpreter,
                 std::vector<std::any> arguments) override {
-    return (double)clock() / CLOCKS_PER_SEC;
+    // Unix timestamp return karo (Return Unix timestamp)
+    return static_cast<double>(std::time(nullptr));
   }
 
   std::string toString() override { return "<native fn>"; }
