@@ -17,10 +17,14 @@ class LoxFunction : public LoxCallable {
   // Closure environment (Mahual captures kar liaya)
   // (Closure environment: Captured the vibe)
   std::shared_ptr<Environment> closure;
+  // Is this function an initializer (constructor)?
+  bool isInitializer;
 
 public:
-  LoxFunction(Function declaration, std::shared_ptr<Environment> closure)
-      : declaration(declaration), closure(closure) {}
+  LoxFunction(Function declaration, std::shared_ptr<Environment> closure,
+              bool isInitializer = false)
+      : declaration(declaration), closure(closure),
+        isInitializer(isInitializer) {}
 
   int arity() override { return declaration.params.size(); }
 
@@ -28,6 +32,8 @@ public:
                 std::vector<std::any> arguments) override;
 
   std::shared_ptr<LoxFunction> bind(std::shared_ptr<LoxInstance> instance);
+
+  bool getIsInitializer() const { return isInitializer; }
 
   std::string toString() override {
     return "<fn " + declaration.name.lexeme + ">";

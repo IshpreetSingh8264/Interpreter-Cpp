@@ -8,7 +8,8 @@ LoxFunction::bind(std::shared_ptr<LoxInstance> instance) {
   std::shared_ptr<Environment> environment =
       std::make_shared<Environment>(closure);
   environment->define("this", instance);
-  return std::make_shared<LoxFunction>(declaration, environment);
+  // Bind layi isInitializer flag pass karo (Pass isInitializer flag for bind)
+  return std::make_shared<LoxFunction>(declaration, environment, isInitializer);
 }
 
 std::any LoxFunction::call(Interpreter &interpreter,
@@ -27,7 +28,18 @@ std::any LoxFunction::call(Interpreter &interpreter,
   try {
     interpreter.executeBlock(declaration.body, environment);
   } catch (ReturnException &returnValue) {
+    // Agar initializer hai te return layi bhi "this" return karo
+    // (If it's an initializer, return "this" even for return statements)
+    if (isInitializer) {
+      return closure->getAt(0, "this");
+    }
     return returnValue.value;
+  }
+
+  // Agar initializer hai te "this" return karo
+  // (If it's an initializer, return "this")
+  if (isInitializer) {
+    return closure->getAt(0, "this");
   }
 
   return std::any(); // nil return if no return statement

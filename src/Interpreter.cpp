@@ -295,8 +295,10 @@ std::any Interpreter::visitClassStmt(Class &stmt) {
   // Methods nu bind karo (Bind the methods)
   std::map<std::string, std::shared_ptr<LoxFunction>> methods;
   for (const auto &method : stmt.methods) {
+    // Check if this method is the initializer (constructor)
+    bool isInitializer = (method->name.lexeme == "init");
     std::shared_ptr<LoxFunction> function =
-        std::make_shared<LoxFunction>(*method, environment);
+        std::make_shared<LoxFunction>(*method, environment, isInitializer);
     methods[method->name.lexeme] = function;
   }
 
