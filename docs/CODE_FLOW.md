@@ -15,8 +15,8 @@ flowchart TD
     A[main.cpp] --> B{command}
     B -->|tokenize| C[Scanner only]
     B -->|parse| D[Scanner + Parser]
-    B -->|evaluate| E[Scanner + Parser + Interpreter<br>Single expression]
-    B -->|run| F[Full Pipeline<br>Scanner → Parser → Resolver → Interpreter]
+    B -->|evaluate| E[Scanner + Parser + Interpreter - Single expression]
+    B -->|run| F[Full Pipeline - Scanner -> Parser -> Resolver -> Interpreter]
 ```
 
 ---
@@ -38,26 +38,26 @@ sequenceDiagram
     participant Resolver
     participant Interpreter
     participant Environment
-    
+  
     Note over Main: Read file "script.lox"
-    
+  
     Main->>Scanner: scanTokens(source)
     Note over Scanner: Tokenize source code
     Scanner-->>Main: tokens[]
-    
+  
     Main->>Parser: parse(tokens)
     Note over Parser: Build AST using<br>recursive descent
     Parser-->>Main: statements[]
-    
+  
     Main->>Resolver: resolve(statements)
     Note over Resolver: Bind variables to<br>scope depths
     Resolver-->>Main: locals{} updated
-    
+  
     Main->>Interpreter: interpret(statements)
-    
+  
     loop For each statement
         Interpreter->>Interpreter: execute(stmt)
-        
+      
         alt VarStmt
             Interpreter->>Environment: define("x", 10)
         else PrintStmt
@@ -160,10 +160,10 @@ flowchart TB
         B["Scope 1 (Function)<br>{x: true, y: true}"]
         C["Scope 2 (Block)<br>{z: true}"]
     end
-    
+  
     A --- B
     B --- C
-    
+  
     D[Variable z] --> E[Distance: 0]
     F[Variable x] --> G[Distance: 1]
     H[Variable clock] --> I[Distance: 2]
@@ -199,7 +199,7 @@ flowchart TB
     D -->|Fun| I[visitFunctionStmt]
     D -->|Class| J[visitClassStmt]
     D -->|Return| K[visitReturnStmt]
-    
+  
     E --> L[evaluate expression]
     L --> M[print stringify result]
 ```
@@ -216,16 +216,16 @@ flowchart LR
         A[clock: NativeFunction]
         B[myFunc: LoxFunction]
     end
-    
+  
     subgraph "Function Env"
         C[param1: value]
         D[localVar: value]
     end
-    
+  
     subgraph "Block Env"
         E[blockVar: value]
     end
-    
+  
     Global --> Function --> Block
 ```
 
@@ -253,7 +253,7 @@ sequenceDiagram
     participant I as Interpreter
     participant E as Environment
     participant F as LoxFunction
-    
+  
     I->>I: visitCallExpr
     I->>I: evaluate(callee) → LoxFunction
     I->>I: evaluate(arg1) → 1
@@ -279,7 +279,7 @@ sequenceDiagram
     participant C as LoxClass
     participant Inst as LoxInstance
     participant F as LoxFunction(init)
-    
+  
     I->>I: visitCallExpr
     I->>I: evaluate(callee) → LoxClass
     I->>C: call(interpreter, [])
@@ -306,20 +306,20 @@ sequenceDiagram
     participant E as Environment
     participant Super as LoxClass(Superclass)
     participant F as LoxFunction
-    
+  
     I->>I: visitSuperExpr
-    
+  
     Note over I: Get distance from<br>resolver's locals
     I->>E: getAt(distance, "super")
     E-->>I: superclass
-    
+  
     Note over I: Get this from one<br>level above
     I->>E: getAt(distance-1, "this")
     E-->>I: instance
-    
+  
     I->>Super: findMethod("methodName")
     Super-->>I: method
-    
+  
     I->>F: method.bind(instance)
     F-->>I: boundMethod
 ```
@@ -333,42 +333,45 @@ flowchart TB
     subgraph Input
         A[script.lox]
     end
-    
+  
     subgraph "Phase 1: Scanning"
         B[Source String]
         C[Token Vector]
         B -->|scanTokens| C
     end
-    
+  
     subgraph "Phase 2: Parsing"
         D[Token Vector]
         E[AST: Vector of Stmt]
         D -->|parse| E
     end
-    
+  
     subgraph "Phase 3: Resolving"
         F[AST]
-        G[locals: map Expr→int]
+        G[locals: map Expr->int]
         F -->|resolve| G
     end
-    
+  
     subgraph "Phase 4: Execution"
         H[AST + locals]
-        I[Evaluate/Execute]
+        I[Evaluate / Execute]
         J[Environment Chain]
         H --> I
         I <--> J
     end
-    
+  
     subgraph Output
         K[stdout]
     end
-    
+  
     A --> B
     C --> D
     E --> F
-    G & E --> H
+    E --> H
+    G --> H
     I --> K
+
+
 ```
 
 ---
@@ -381,7 +384,7 @@ flowchart TB
     B -->|Scan Error| C[Set hasError flag]
     B -->|Parse Error| D[Throw ParseError]
     B -->|Runtime Error| E[Throw RuntimeError]
-    
+  
     C --> F[Continue scanning<br>Report at end]
     D --> G[synchronize<br>Skip to next statement]
     E --> H[Catch in main<br>Print error<br>Exit with code 70]
