@@ -73,8 +73,11 @@ std::any Resolver::visitVariableExpr(Variable &expr) {
   if (!scopes.empty()) {
     auto &scope = scopes.back();
     if (scope.count(expr.name.lexeme) && scope[expr.name.lexeme] == false) {
-      std::cerr << "Error: Can't read local variable in its own initializer."
+      std::cerr << "[line " << expr.name.line << "] Error at '"
+                << expr.name.lexeme
+                << "': Can't read local variable in its own initializer."
                 << std::endl;
+      hadError = true;
     }
   }
 

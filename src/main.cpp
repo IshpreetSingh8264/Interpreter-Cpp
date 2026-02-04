@@ -152,8 +152,11 @@ int main(int argc, char *argv[]) {
     Interpreter interpreter;
     Resolver resolver(interpreter);
     resolver.resolve(statements);
-    // If resolver had errors, we should stop but Resolver doesn't set hadError
-    // publicly yet. Assuming we check for static analysis errors.
+
+    // Agar resolver vich koi error aya ta exit karo (If resolver had errors,
+    // exit)
+    if (resolver.hadError)
+      return 65;
 
     try {
       interpreter.interpret(statements);

@@ -16,6 +16,8 @@ class Resolver : public ExprVisitor, public StmtVisitor {
   // Current function type check (Top Level, Function, etc.) - Future
 
 public:
+  bool hadError = false; // Error flag for compile-time errors
+
   Resolver(Interpreter &interpreter) : interpreter(interpreter) {}
 
   void resolve(const std::vector<std::shared_ptr<Stmt>> &statements);
