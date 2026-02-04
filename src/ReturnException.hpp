@@ -4,6 +4,10 @@
 #include <any>
 #include <stdexcept>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Return exception: Wapis jao! (Control flow hack)
 // (Return exception: Go back! The ultimate control flow hack)
 class ReturnException : public std::runtime_error {

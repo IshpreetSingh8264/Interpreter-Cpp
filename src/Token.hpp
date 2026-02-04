@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Token class represents a single unit of code (Ikalla unit).
 // (Token class: Represents a lone wolf unit of code.)
 // Jiddan 'var', '=', '10', ';' sab alag alag token ne.

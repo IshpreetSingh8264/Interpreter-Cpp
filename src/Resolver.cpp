@@ -1,6 +1,10 @@
 #include "Resolver.hpp"
 #include <iostream>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 void Resolver::resolve(const std::vector<std::shared_ptr<Stmt>> &statements) {
   for (const auto &stmt : statements) {
     resolve(stmt);

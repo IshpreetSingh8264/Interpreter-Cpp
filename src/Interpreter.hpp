@@ -9,6 +9,10 @@
 #include <memory>
 #include <vector>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Interpreter: Asli hero jo code chalaunda hai
 // (Interpreter: The real hero that runs the code)
 class Interpreter : public ExprVisitor, public StmtVisitor {

@@ -1,5 +1,9 @@
-#ifndef TOKENTYPE_HPP
-#define TOKENTYPE_HPP
+#ifndef LOX_TOKENTYPE_HPP
+#define LOX_TOKENTYPE_HPP
+
+#include <string>
+
+namespace lox {
 
 // Oye veere, eh saare tokens ne jo appa parse karne aa.
 // (Hey bro, these are all the tokens we gotta parse.)
@@ -60,8 +64,6 @@ enum class TokenType {
   // (Game over, man! Game over!)
   END_OF_FILE
 };
-
-#include <string>
 
 // Helper to get string from TokenType
 // Naam dasso!
@@ -151,4 +153,6 @@ inline std::string typeToString(TokenType type) {
   }
 }
 
-#endif // TOKENTYPE_HPP
+} // namespace lox
+
+#endif // LOX_TOKENTYPE_HPP

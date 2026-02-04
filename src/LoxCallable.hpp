@@ -6,6 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Forward decl
 class Interpreter;
 

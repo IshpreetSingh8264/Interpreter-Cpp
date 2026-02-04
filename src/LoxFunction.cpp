@@ -3,6 +3,10 @@
 #include "LoxInstance.hpp"
 #include "ReturnException.hpp"
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 std::shared_ptr<LoxFunction>
 LoxFunction::bind(std::shared_ptr<LoxInstance> instance) {
   std::shared_ptr<Environment> environment =

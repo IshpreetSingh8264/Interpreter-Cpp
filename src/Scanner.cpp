@@ -8,6 +8,10 @@
 #include "Token.hpp"
 #include "TokenType.hpp"
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Main function: Tokens scan karo!
 // (Main function: Scan those tokens!)
 std::vector<Token> Scanner::scanTokens() {

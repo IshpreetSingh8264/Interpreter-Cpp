@@ -2,6 +2,10 @@
 #include "RuntimeError.hpp"
 #include <iostream>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Nawa variable register karo
 // (Register a new variable)
 void Environment::define(std::string name, std::any value) {

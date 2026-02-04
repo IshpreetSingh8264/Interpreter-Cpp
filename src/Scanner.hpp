@@ -9,6 +9,10 @@
 #include <string>
 #include <vector>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Scanner class: Code nu chabb ke tokens banaun wala machine.
 // (Scanner class: The machine that chews up code and spits out tokens.)
 class Scanner {

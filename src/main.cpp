@@ -14,6 +14,10 @@
 #include "Token.hpp"
 #include "TokenType.hpp"
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Utility to read file contents
 std::string read_file_contents(const std::string &filename);
 

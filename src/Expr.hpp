@@ -6,6 +6,10 @@
 #include <memory>
 #include <vector>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Forward declarations
 class Assign;
 class Binary;

@@ -8,6 +8,10 @@
 #include <string>
 #include <vector>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Parser class: Tokens nu AST (rukh) vich badlan wala
 // (Parser class: The guy converting tokens into an AST (Tree))
 class Parser {

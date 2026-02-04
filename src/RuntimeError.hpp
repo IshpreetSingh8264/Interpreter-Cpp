@@ -4,6 +4,10 @@
 #include "Token.hpp"
 #include <stdexcept>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Runtime Error: Chladay hoye panga pe gya!
 // (Runtime Error: Trouble while running! Panic mode on!)
 class RuntimeError : public std::runtime_error {

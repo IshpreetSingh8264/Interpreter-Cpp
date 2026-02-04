@@ -2,6 +2,10 @@
 #include "LoxClass.hpp"
 #include <iostream>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 std::any LoxInstance::get(Token name) {
   if (fields.count(name.lexeme)) {
     return fields[name.lexeme];

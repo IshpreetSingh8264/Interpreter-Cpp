@@ -6,6 +6,10 @@
 #include "Stmt.hpp"
 #include <memory>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Forward declaration
 class LoxInstance;
 

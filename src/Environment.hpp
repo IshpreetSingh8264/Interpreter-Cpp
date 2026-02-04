@@ -7,6 +7,10 @@
 #include <memory>
 #include <string>
 
+#include "lox.hpp"
+
+using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
 // Environment: Variables da ghar (Scope)
 // (Environment: The home of variables, aka Scope)
 class Environment {
