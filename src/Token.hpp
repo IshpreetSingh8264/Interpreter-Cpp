@@ -1,5 +1,5 @@
-#ifndef TOKEN_HPP
-#define TOKEN_HPP
+#ifndef LOX_TOKEN_HPP
+#define LOX_TOKEN_HPP
 
 #include "TokenType.hpp"
 #include <any>
@@ -9,7 +9,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Token class represents a single unit of code (Ikalla unit).
 // (Token class: Represents a lone wolf unit of code.)
@@ -79,4 +79,6 @@ public:
   }
 };
 
-#endif // TOKEN_HPP
+} // namespace lox
+
+#endif // LOX_TOKEN_HPP
