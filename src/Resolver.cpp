@@ -216,7 +216,8 @@ std::any Resolver::visitClassStmt(Class &stmt) {
                 << "': A class can't inherit from itself." << std::endl;
       hadError = true;
     }
-    resolve(std::make_shared<Variable>(stmt.superclass->name));
+    // Use the existing superclass Variable directly for proper resolution
+    resolve(stmt.superclass);
   }
 
   // Agar superclass hai ta "super" scope banao

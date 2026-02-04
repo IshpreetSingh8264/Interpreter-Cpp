@@ -274,8 +274,8 @@ std::any Interpreter::visitClassStmt(Class &stmt) {
   // Superclass evaluate karo agar hai (Evaluate superclass if present)
   std::shared_ptr<LoxClass> superclass = nullptr;
   if (stmt.superclass != nullptr) {
-    std::any superValue =
-        evaluate(std::make_shared<Variable>(stmt.superclass->name));
+    // Use the resolved superclass Variable directly
+    std::any superValue = evaluate(stmt.superclass);
     if (superValue.type() != typeid(std::shared_ptr<LoxClass>)) {
       throw RuntimeError(stmt.superclass->name, "Superclass must be a class.");
     }
