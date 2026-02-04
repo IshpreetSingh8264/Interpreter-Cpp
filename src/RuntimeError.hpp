@@ -1,12 +1,13 @@
-#ifndef RUNTIMEERROR_HPP
-#define RUNTIMEERROR_HPP
+#ifndef LOX_RUNTIMEERROR_HPP
+#define LOX_RUNTIMEERROR_HPP
 
 #include "Token.hpp"
 #include <stdexcept>
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
+namespace lox {
 
 // Runtime Error: Chladay hoye panga pe gya!
 // (Runtime Error: Trouble while running! Panic mode on!)
@@ -21,4 +22,6 @@ public:
       : std::runtime_error(message), token(token) {}
 };
 
-#endif // RUNTIMEERROR_HPP
+} // namespace lox
+
+#endif // LOX_RUNTIMEERROR_HPP
