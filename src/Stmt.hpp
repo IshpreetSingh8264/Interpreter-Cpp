@@ -1,5 +1,5 @@
-#ifndef STMT_HPP
-#define STMT_HPP
+#ifndef LOX_STMT_HPP
+#define LOX_STMT_HPP
 
 #include "Expr.hpp"
 #include "Token.hpp"
@@ -9,7 +9,8 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
+namespace lox {
 
 // Forward declarations
 class Block;
@@ -167,4 +168,6 @@ public:
   }
 };
 
-#endif // STMT_HPP
+} // namespace lox
+
+#endif // LOX_STMT_HPP
