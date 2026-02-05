@@ -1,5 +1,5 @@
-#ifndef EXPR_HPP
-#define EXPR_HPP
+#ifndef LOX_EXPR_HPP
+#define LOX_EXPR_HPP
 
 #include "Token.hpp"
 #include <any>
@@ -8,7 +8,8 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
+namespace lox {
 
 // Forward declarations
 class Assign;
@@ -202,4 +203,6 @@ public:
   }
 };
 
-#endif // EXPR_HPP
+} // namespace lox
+
+#endif // LOX_EXPR_HPP
