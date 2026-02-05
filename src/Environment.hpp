@@ -1,5 +1,5 @@
-#ifndef ENVIRONMENT_HPP
-#define ENVIRONMENT_HPP
+#ifndef LOX_ENVIRONMENT_HPP
+#define LOX_ENVIRONMENT_HPP
 
 #include "Token.hpp"
 #include <any>
@@ -9,7 +9,8 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+
+namespace lox {
 
 // Environment: Variables da ghar (Scope)
 // (Environment: The home of variables, aka Scope)
@@ -42,4 +43,6 @@ public:
   Environment *ancestor(int distance);
 };
 
-#endif // ENVIRONMENT_HPP
+} // namespace lox
+
+#endif // LOX_ENVIRONMENT_HPP
