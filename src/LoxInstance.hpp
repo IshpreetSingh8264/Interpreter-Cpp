@@ -1,5 +1,5 @@
-#ifndef LOXINSTANCE_HPP
-#define LOXINSTANCE_HPP
+#ifndef LOX_LOXINSTANCE_HPP
+#define LOX_LOXINSTANCE_HPP
 
 #include "RuntimeError.hpp"
 #include "Token.hpp"
@@ -10,7 +10,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Forward declaration
 class LoxClass;
@@ -29,4 +29,6 @@ public:
   std::string toString();
 };
 
-#endif // LOXINSTANCE_HPP
+} // namespace lox
+
+#endif // LOX_LOXINSTANCE_HPP

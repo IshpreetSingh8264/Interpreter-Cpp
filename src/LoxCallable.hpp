@@ -1,5 +1,5 @@
-#ifndef LOXCALLABLE_HPP
-#define LOXCALLABLE_HPP
+#ifndef LOX_LOXCALLABLE_HPP
+#define LOX_LOXCALLABLE_HPP
 
 #include <any>
 #include <memory>
@@ -8,7 +8,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Forward decl
 class Interpreter;
@@ -25,4 +25,6 @@ public:
   virtual ~LoxCallable() = default;
 };
 
-#endif // LOXCALLABLE_HPP
+} // namespace lox
+
+#endif // LOX_LOXCALLABLE_HPP

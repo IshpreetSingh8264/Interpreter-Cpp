@@ -1,5 +1,5 @@
-#ifndef INTERPRETER_HPP
-#define INTERPRETER_HPP
+#ifndef LOX_INTERPRETER_HPP
+#define LOX_INTERPRETER_HPP
 
 #include "Environment.hpp"
 #include "Expr.hpp"
@@ -11,7 +11,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Interpreter: Asli hero jo code chalaunda hai
 // (Interpreter: The real hero that runs the code)
@@ -82,4 +82,6 @@ private:
   void checkNumberOperands(Token operatorToken, std::any left, std::any right);
 };
 
-#endif // INTERPRETER_HPP
+} // namespace lox
+
+#endif // LOX_INTERPRETER_HPP

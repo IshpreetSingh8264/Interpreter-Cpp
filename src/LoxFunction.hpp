@@ -1,5 +1,5 @@
-#ifndef LOXFUNCTION_HPP
-#define LOXFUNCTION_HPP
+#ifndef LOX_LOXFUNCTION_HPP
+#define LOX_LOXFUNCTION_HPP
 
 #include "Environment.hpp"
 #include "LoxCallable.hpp"
@@ -8,7 +8,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Forward declaration
 class LoxInstance;
@@ -44,4 +44,6 @@ public:
   }
 };
 
-#endif // LOXFUNCTION_HPP
+} // namespace lox
+
+#endif // LOX_LOXFUNCTION_HPP

@@ -1,5 +1,5 @@
-#ifndef LOXCLASS_HPP
-#define LOXCLASS_HPP
+#ifndef LOX_LOXCLASS_HPP
+#define LOX_LOXCLASS_HPP
 
 #include "LoxCallable.hpp"
 #include "LoxFunction.hpp"
@@ -10,7 +10,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // LoxClass: Class di definiton
 // (LoxClass: Definition of the class)
@@ -40,4 +40,6 @@ public:
   std::shared_ptr<LoxFunction> findMethod(std::string name);
 };
 
-#endif // LOXCLASS_HPP
+} // namespace lox
+
+#endif // LOX_LOXCLASS_HPP
