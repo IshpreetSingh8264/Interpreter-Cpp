@@ -1,5 +1,5 @@
-#ifndef SCANNER_HPP
-#define SCANNER_HPP
+#ifndef LOX_SCANNER_HPP
+#define LOX_SCANNER_HPP
 
 #include "Token.hpp"
 #include "TokenType.hpp"
@@ -11,7 +11,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Scanner class: Code nu chabb ke tokens banaun wala machine.
 // (Scanner class: The machine that chews up code and spits out tokens.)
@@ -88,4 +88,6 @@ private:
   void identifier();
 };
 
-#endif // SCANNER_HPP
+} // namespace lox
+
+#endif // LOX_SCANNER_HPP
