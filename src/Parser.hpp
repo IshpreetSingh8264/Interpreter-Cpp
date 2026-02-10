@@ -1,5 +1,5 @@
-#ifndef PARSER_HPP
-#define PARSER_HPP
+#ifndef LOX_PARSER_HPP
+#define LOX_PARSER_HPP
 
 #include "Expr.hpp"
 #include "Stmt.hpp"
@@ -10,7 +10,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Parser class: Tokens nu AST (rukh) vich badlan wala
 // (Parser class: The guy converting tokens into an AST (Tree))
@@ -83,4 +83,6 @@ private:
   void synchronize();
 };
 
-#endif // PARSER_HPP
+} // namespace lox
+
+#endif // LOX_PARSER_HPP
