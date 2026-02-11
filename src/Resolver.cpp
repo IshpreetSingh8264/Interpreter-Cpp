@@ -3,6 +3,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 void Resolver::resolve(const std::vector<std::shared_ptr<Stmt>> &statements) {
@@ -310,3 +312,5 @@ std::any Resolver::visitSuperExpr(Super &expr) {
   resolveLocal(&expr, expr.keyword);
   return std::any();
 }
+
+} // namespace lox

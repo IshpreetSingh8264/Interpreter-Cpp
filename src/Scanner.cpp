@@ -10,6 +10,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 // Main function: Tokens scan karo!
@@ -248,3 +250,5 @@ void Scanner::identifier() {
 
   addToken(type);
 }
+
+} // namespace lox

@@ -8,6 +8,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 // Main parse function
@@ -500,3 +502,5 @@ void Parser::synchronize() {
     advance();
   }
 }
+
+} // namespace lox
