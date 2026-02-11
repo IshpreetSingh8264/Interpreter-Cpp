@@ -1,5 +1,5 @@
-#ifndef RESOLVER_HPP
-#define RESOLVER_HPP
+#ifndef LOX_RESOLVER_HPP
+#define LOX_RESOLVER_HPP
 
 #include "Expr.hpp"
 #include "Interpreter.hpp"
@@ -10,7 +10,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // FunctionType enum for tracking current function context
 enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
@@ -67,4 +67,6 @@ private:
   std::any visitUnaryExpr(Unary &expr) override;
 };
 
-#endif // RESOLVER_HPP
+} // namespace lox
+
+#endif // LOX_RESOLVER_HPP
