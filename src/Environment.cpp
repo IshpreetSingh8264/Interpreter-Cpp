@@ -4,6 +4,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 // Nawa variable register karo
@@ -59,3 +61,5 @@ std::any Environment::getAt(int distance, std::string name) {
 void Environment::assignAt(int distance, Token name, std::any value) {
   ancestor(distance)->values[name.lexeme] = value;
 }
+
+} // namespace lox

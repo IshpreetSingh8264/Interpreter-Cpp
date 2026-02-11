@@ -4,6 +4,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 std::any LoxInstance::get(Token name) {
@@ -23,3 +25,5 @@ void LoxInstance::set(Token name, std::any value) {
 }
 
 std::string LoxInstance::toString() { return klass->name + " instance"; }
+
+} // namespace lox

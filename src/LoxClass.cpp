@@ -3,6 +3,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 std::any LoxClass::call(Interpreter &interpreter,
@@ -29,3 +31,5 @@ std::shared_ptr<LoxFunction> LoxClass::findMethod(std::string name) {
 
   return nullptr;
 }
+
+} // namespace lox

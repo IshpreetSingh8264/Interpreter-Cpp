@@ -5,6 +5,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 std::shared_ptr<LoxFunction>
@@ -48,3 +50,5 @@ std::any LoxFunction::call(Interpreter &interpreter,
 
   return std::any(); // nil return if no return statement
 }
+
+} // namespace lox
