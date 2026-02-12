@@ -14,6 +14,8 @@
 
 #include "lox.hpp"
 
+namespace lox {
+
 using namespace lox; // TEMP migration shim - removed at end of lox:: pass
 
 // Native clock function - Returns Unix timestamp
@@ -444,3 +446,5 @@ std::string Interpreter::stringify(std::any object) {
 
   return "unknown"; // shouldn't happen
 }
+
+} // namespace lox
