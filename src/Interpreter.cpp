@@ -16,8 +16,6 @@
 
 namespace lox {
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
-
 // Native clock function - Returns Unix timestamp
 // (Native clock function: Returns the current time as Unix timestamp!)
 class Clock : public LoxCallable {

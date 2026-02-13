@@ -10,8 +10,6 @@
 
 namespace lox {
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
-
 // Main parse function
 std::vector<std::shared_ptr<Stmt>> Parser::parse() {
   std::vector<std::shared_ptr<Stmt>> statements;

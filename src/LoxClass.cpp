@@ -5,8 +5,6 @@
 
 namespace lox {
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
-
 std::any LoxClass::call(Interpreter &interpreter,
                         std::vector<std::any> arguments) {
   std::shared_ptr<LoxInstance> instance =
