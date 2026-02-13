@@ -16,7 +16,7 @@
 
 #include "lox.hpp"
 
-using namespace lox; // TEMP migration shim - removed at end of lox:: pass
+namespace lox {
 
 // Utility to read file contents
 std::string read_file_contents(const std::string &filename);
@@ -76,7 +76,28 @@ std::string printAst(std::shared_ptr<Expr> expr) {
 
 // Main entry point (Darwaza)
 // (Main entry point: The Door)
+std::string read_file_contents(const std::string &filename) {
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Error reading file: " << filename << std::endl;
+    std::exit(1);
+  }
+
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  file.close();
+
+  return buffer.str();
+}
+
+} // namespace lox
+
 int main(int argc, char *argv[]) {
+  // Everything the interpreter is made of lives in lox. main() is the one
+  // symbol that has to stay at global scope, so it reaches into the namespace
+  // rather than the other way round.
+  using namespace lox;
+
   // Disable output buffering
   // Direct connection, no delay!
   // (Direct connection, no waiting room!)
@@ -175,18 +196,4 @@ int main(int argc, char *argv[]) {
   }
 
   return 0;
-}
-
-std::string read_file_contents(const std::string &filename) {
-  std::ifstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "Error reading file: " << filename << std::endl;
-    std::exit(1);
-  }
-
-  std::stringstream buffer;
-  buffer << file.rdbuf();
-  file.close();
-
-  return buffer.str();
 }
