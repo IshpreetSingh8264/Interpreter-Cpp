@@ -8,7 +8,6 @@
 
 #include "lox.hpp"
 
-
 namespace lox {
 
 // Forward declarations
@@ -60,34 +59,24 @@ public:
   Token op;
   std::shared_ptr<Expr> right;
 
-  Binary(std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right)
-      : left(left), op(op), right(right) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitBinaryExpr(*this);
-  }
+  Binary(std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Grouping : public Expr {
 public:
   std::shared_ptr<Expr> expression;
 
-  Grouping(std::shared_ptr<Expr> expression) : expression(expression) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitGroupingExpr(*this);
-  }
+  Grouping(std::shared_ptr<Expr> expression);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Literal : public Expr {
 public:
   std::any value;
 
-  Literal(std::any value) : value(value) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitLiteralExpr(*this);
-  }
+  Literal(std::any value);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Unary : public Expr {
@@ -95,22 +84,16 @@ public:
   Token op;
   std::shared_ptr<Expr> right;
 
-  Unary(Token op, std::shared_ptr<Expr> right) : op(op), right(right) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitUnaryExpr(*this);
-  }
+  Unary(Token op, std::shared_ptr<Expr> right);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Variable : public Expr {
 public:
   Token name;
 
-  Variable(Token name) : name(name) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitVariableExpr(*this);
-  }
+  Variable(Token name);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Assign : public Expr {
@@ -118,11 +101,8 @@ public:
   Token name;
   std::shared_ptr<Expr> value;
 
-  Assign(Token name, std::shared_ptr<Expr> value) : name(name), value(value) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitAssignExpr(*this);
-  }
+  Assign(Token name, std::shared_ptr<Expr> value);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Logical : public Expr {
@@ -131,12 +111,8 @@ public:
   Token op;
   std::shared_ptr<Expr> right;
 
-  Logical(std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right)
-      : left(left), op(op), right(right) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitLogicalExpr(*this);
-  }
+  Logical(std::shared_ptr<Expr> left, Token op, std::shared_ptr<Expr> right);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Call : public Expr {
@@ -146,12 +122,8 @@ public:
   std::vector<std::shared_ptr<Expr>> arguments;
 
   Call(std::shared_ptr<Expr> callee, Token paren,
-       std::vector<std::shared_ptr<Expr>> arguments)
-      : callee(callee), paren(paren), arguments(arguments) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitCallExpr(*this);
-  }
+       std::vector<std::shared_ptr<Expr>> arguments);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Get : public Expr {
@@ -159,11 +131,8 @@ public:
   std::shared_ptr<Expr> object;
   Token name;
 
-  Get(std::shared_ptr<Expr> object, Token name) : object(object), name(name) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitGetExpr(*this);
-  }
+  Get(std::shared_ptr<Expr> object, Token name);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Set : public Expr {
@@ -172,23 +141,16 @@ public:
   Token name;
   std::shared_ptr<Expr> value;
 
-  Set(std::shared_ptr<Expr> object, Token name, std::shared_ptr<Expr> value)
-      : object(object), name(name), value(value) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitSetExpr(*this);
-  }
+  Set(std::shared_ptr<Expr> object, Token name, std::shared_ptr<Expr> value);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class This : public Expr {
 public:
   Token keyword;
 
-  This(Token keyword) : keyword(keyword) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitThisExpr(*this);
-  }
+  This(Token keyword);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 class Super : public Expr {
@@ -196,11 +158,8 @@ public:
   Token keyword;
   Token method;
 
-  Super(Token keyword, Token method) : keyword(keyword), method(method) {}
-
-  std::any accept(ExprVisitor &visitor) override {
-    return visitor.visitSuperExpr(*this);
-  }
+  Super(Token keyword, Token method);
+  std::any accept(ExprVisitor &visitor) override;
 };
 
 } // namespace lox
