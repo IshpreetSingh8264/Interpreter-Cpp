@@ -9,7 +9,6 @@
 
 #include "lox.hpp"
 
-
 namespace lox {
 
 // Forward declarations
@@ -54,23 +53,16 @@ class Block : public Stmt {
 public:
   std::vector<std::shared_ptr<Stmt>> statements;
 
-  Block(std::vector<std::shared_ptr<Stmt>> statements)
-      : statements(statements) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitBlockStmt(*this);
-  }
+  Block(std::vector<std::shared_ptr<Stmt>> statements);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class Expression : public Stmt {
 public:
   std::shared_ptr<Expr> expression;
 
-  Expression(std::shared_ptr<Expr> expression) : expression(expression) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitExpressionStmt(*this);
-  }
+  Expression(std::shared_ptr<Expr> expression);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class Class : public Stmt {
@@ -80,12 +72,8 @@ public:
   std::vector<std::shared_ptr<Function>> methods;
 
   Class(Token name, std::shared_ptr<Variable> superclass,
-        std::vector<std::shared_ptr<Function>> methods)
-      : name(name), superclass(superclass), methods(methods) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitClassStmt(*this);
-  }
+        std::vector<std::shared_ptr<Function>> methods);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class Function : public Stmt {
@@ -95,12 +83,8 @@ public:
   std::vector<std::shared_ptr<Stmt>> body;
 
   Function(Token name, std::vector<Token> params,
-           std::vector<std::shared_ptr<Stmt>> body)
-      : name(name), params(params), body(body) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitFunctionStmt(*this);
-  }
+           std::vector<std::shared_ptr<Stmt>> body);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class If : public Stmt {
@@ -110,23 +94,16 @@ public:
   std::shared_ptr<Stmt> elseBranch;
 
   If(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch,
-     std::shared_ptr<Stmt> elseBranch)
-      : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitIfStmt(*this);
-  }
+     std::shared_ptr<Stmt> elseBranch);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class Print : public Stmt {
 public:
   std::shared_ptr<Expr> expression;
 
-  Print(std::shared_ptr<Expr> expression) : expression(expression) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitPrintStmt(*this);
-  }
+  Print(std::shared_ptr<Expr> expression);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class Return : public Stmt {
@@ -134,12 +111,8 @@ public:
   Token keyword;
   std::shared_ptr<Expr> value;
 
-  Return(Token keyword, std::shared_ptr<Expr> value)
-      : keyword(keyword), value(value) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitReturnStmt(*this);
-  }
+  Return(Token keyword, std::shared_ptr<Expr> value);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class Var : public Stmt {
@@ -147,12 +120,8 @@ public:
   Token name;
   std::shared_ptr<Expr> initializer;
 
-  Var(Token name, std::shared_ptr<Expr> initializer)
-      : name(name), initializer(initializer) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitVarStmt(*this);
-  }
+  Var(Token name, std::shared_ptr<Expr> initializer);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 class While : public Stmt {
@@ -160,12 +129,8 @@ public:
   std::shared_ptr<Expr> condition;
   std::shared_ptr<Stmt> body;
 
-  While(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body)
-      : condition(condition), body(body) {}
-
-  std::any accept(StmtVisitor &visitor) override {
-    return visitor.visitWhileStmt(*this);
-  }
+  While(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body);
+  std::any accept(StmtVisitor &visitor) override;
 };
 
 } // namespace lox
