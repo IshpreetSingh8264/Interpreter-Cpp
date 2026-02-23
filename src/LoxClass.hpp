@@ -5,6 +5,7 @@
 #include "LoxFunction.hpp"
 #include "LoxInstance.hpp"
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -22,22 +23,17 @@ public:
   std::map<std::string, std::shared_ptr<LoxFunction>> methods;
 
   LoxClass(std::string name, std::shared_ptr<LoxClass> superclass,
-           std::map<std::string, std::shared_ptr<LoxFunction>> methods)
-      : name(name), superclass(superclass), methods(methods) {}
+           std::map<std::string, std::shared_ptr<LoxFunction>> methods);
 
-  std::string toString() override { return name; }
-
-  int arity() override {
-    std::shared_ptr<LoxFunction> initializer = findMethod("init");
-    if (initializer == nullptr)
-      return 0;
-    return initializer->arity();
-  }
+  std::string toString() override;
+  int arity() override;
 
   std::any call(Interpreter &interpreter,
                 std::vector<std::any> arguments) override;
 
-  std::shared_ptr<LoxFunction> findMethod(std::string name);
+  // Looks in this class, then walks up the superclass chain. Returns nullptr
+  // when no class in the chain declares the method.
+  std::shared_ptr<LoxFunction> findMethod(const std::string &name);
 };
 
 } // namespace lox
