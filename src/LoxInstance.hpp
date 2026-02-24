@@ -22,8 +22,10 @@ class LoxInstance : public std::enable_shared_from_this<LoxInstance> {
   std::map<std::string, std::any> fields;
 
 public:
-  LoxInstance(std::shared_ptr<LoxClass> klass) : klass(klass) {}
+  explicit LoxInstance(std::shared_ptr<LoxClass> klass);
 
+  // Fields shadow methods: a field set on the instance wins over a method of
+  // the same name, which is what lets a class hold state named like a getter.
   std::any get(Token name);
   void set(Token name, std::any value);
   std::string toString();
