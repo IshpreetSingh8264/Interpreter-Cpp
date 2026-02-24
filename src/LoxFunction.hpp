@@ -5,6 +5,7 @@
 #include "LoxCallable.hpp"
 #include "Stmt.hpp"
 #include <memory>
+#include <string>
 
 #include "lox.hpp"
 
@@ -26,22 +27,18 @@ class LoxFunction : public LoxCallable {
 
 public:
   LoxFunction(Function declaration, std::shared_ptr<Environment> closure,
-              bool isInitializer = false)
-      : declaration(declaration), closure(closure),
-        isInitializer(isInitializer) {}
+              bool isInitializer = false);
 
-  int arity() override { return declaration.params.size(); }
-
+  int arity() override;
   std::any call(Interpreter &interpreter,
                 std::vector<std::any> arguments) override;
 
+  // Returns a copy of this function whose closure defines `this`. This is how
+  // a method and `super.method` both get the instance they run against.
   std::shared_ptr<LoxFunction> bind(std::shared_ptr<LoxInstance> instance);
 
-  bool getIsInitializer() const { return isInitializer; }
-
-  std::string toString() override {
-    return "<fn " + declaration.name.lexeme + ">";
-  }
+  bool getIsInitializer() const;
+  std::string toString() override;
 };
 
 } // namespace lox

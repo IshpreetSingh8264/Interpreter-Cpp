@@ -1,17 +1,27 @@
 #include "LoxFunction.hpp"
+
 #include "Interpreter.hpp"
 #include "LoxInstance.hpp"
 #include "ReturnException.hpp"
 
-#include "lox.hpp"
+#include <memory>
+#include <utility>
 
 namespace lox {
+
+LoxFunction::LoxFunction(Function declaration,
+                         std::shared_ptr<Environment> closure,
+                         bool isInitializer)
+    : declaration(std::move(declaration)), closure(std::move(closure)),
+      isInitializer(isInitializer) {}
+
+int LoxFunction::arity() { return static_cast<int>(declaration.params.size()); }
 
 std::shared_ptr<LoxFunction>
 LoxFunction::bind(std::shared_ptr<LoxInstance> instance) {
   std::shared_ptr<Environment> environment =
       std::make_shared<Environment>(closure);
-  environment->define("this", instance);
+  environment->define("this", std::move(instance));
   // Bind layi isInitializer flag pass karo (Pass isInitializer flag for bind)
   return std::make_shared<LoxFunction>(declaration, environment, isInitializer);
 }
@@ -25,6 +35,7 @@ std::any LoxFunction::call(Interpreter &interpreter,
 
   // Params nu arguments naal bind karo
   // (Bind params with arguments)
+  // Arity was checked by the caller, so the two vectors are the same length.
   for (size_t i = 0; i < declaration.params.size(); ++i) {
     environment->define(declaration.params[i].lexeme, arguments[i]);
   }
@@ -48,5 +59,9 @@ std::any LoxFunction::call(Interpreter &interpreter,
 
   return std::any(); // nil return if no return statement
 }
+
+bool LoxFunction::getIsInitializer() const { return isInitializer; }
+
+std::string LoxFunction::toString() { return "<fn " + declaration.name.lexeme + ">"; }
 
 } // namespace lox
