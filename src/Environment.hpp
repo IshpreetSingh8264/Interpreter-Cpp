@@ -22,8 +22,8 @@ public:
   std::shared_ptr<Environment> enclosing; // Papa scope (public for inheritance)
   // (Papa scope: The parent scope)
 
-  Environment() : enclosing(nullptr) {}
-  Environment(std::shared_ptr<Environment> enclosing) : enclosing(enclosing) {}
+  Environment();
+  explicit Environment(std::shared_ptr<Environment> enclosing);
 
   // Define: Nawa variable register karo
   // (Define: Register a new variable)
