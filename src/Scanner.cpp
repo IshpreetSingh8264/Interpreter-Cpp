@@ -1,16 +1,37 @@
-#include <cctype>
-#include <iostream>
-#include <map>
-#include <string>
-#include <vector>
-
 #include "Scanner.hpp"
+
 #include "Token.hpp"
 #include "TokenType.hpp"
 
-#include "lox.hpp"
+#include <cctype>
+#include <iostream>
+#include <string>
+#include <utility>
 
 namespace lox {
+
+Scanner::Scanner(std::string source) : source(std::move(source)) {
+  // Reserved keywords load kar lo
+  // (Load up the reserved keywords)
+  // Ehna da matlab fix hai, change ni ho sakda.
+  // (Their meaning is fixed, can't change 'em.)
+  keywords["and"] = TokenType::AND;
+  keywords["class"] = TokenType::CLASS;
+  keywords["else"] = TokenType::ELSE;
+  keywords["false"] = TokenType::FALSE;
+  keywords["for"] = TokenType::FOR;
+  keywords["fun"] = TokenType::FUN;
+  keywords["if"] = TokenType::IF;
+  keywords["nil"] = TokenType::NIL;
+  keywords["or"] = TokenType::OR;
+  keywords["print"] = TokenType::PRINT;
+  keywords["return"] = TokenType::RETURN;
+  keywords["super"] = TokenType::SUPER;
+  keywords["this"] = TokenType::THIS;
+  keywords["true"] = TokenType::TRUE;
+  keywords["var"] = TokenType::VAR;
+  keywords["while"] = TokenType::WHILE;
+}
 
 // Main function: Tokens scan karo!
 // (Main function: Scan those tokens!)
@@ -170,14 +191,16 @@ char Scanner::peek() {
 // Peek Next: Us ton agla character dekho
 // (Peek Next: Look at the character after the next one. Future vision!)
 char Scanner::peekNext() {
-  if (current + 1 >= source.length())
+  if (static_cast<size_t>(current) + 1 >= source.length())
     return '\0';
   return source.at(current + 1);
 }
 
 // End check: Khatam ho gya?
 // (End check: Is it over yet?)
-bool Scanner::isAtEnd() { return current >= source.length(); }
+bool Scanner::isAtEnd() {
+  return static_cast<size_t>(current) >= source.length();
+}
 
 // String scanner
 void Scanner::string() {

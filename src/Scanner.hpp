@@ -3,8 +3,7 @@
 
 #include "Token.hpp"
 #include "TokenType.hpp"
-#include <iostream>
-#include <list>
+#include <any>
 #include <map>
 #include <string>
 #include <vector>
@@ -17,6 +16,15 @@ namespace lox {
 // (Scanner class: The machine that chews up code and spits out tokens.)
 class Scanner {
 public:
+  explicit Scanner(std::string source);
+
+  // Main function: Tokens scan karo!
+  // (Main function: Scan those tokens!)
+  //
+  // Lexical errors are reported on stderr as they are found and set hasError;
+  // the token list is still returned so a caller can see how far the scan got.
+  std::vector<Token> scanTokens();
+
   // Source code jo appa parse karna
   // (Source code we gotta parse)
   const std::string source;
@@ -33,38 +41,6 @@ public:
   // (Which line are we on?)
   bool hasError = false; // Koi panga peya? Error flag
   // (Any trouble? Error flag)
-
-  // Reserved words di mapping
-  // (Mapping of reserved words)
-  std::map<std::string, TokenType> keywords;
-
-  // Custom constructor
-  Scanner(std::string source) : source(source) {
-    // Reserved keywords load kar lo
-    // (Load up the reserved keywords)
-    // Ehna da matlab fix hai, change ni ho sakda.
-    // (Their meaning is fixed, can't change 'em.)
-    keywords["and"] = TokenType::AND;
-    keywords["class"] = TokenType::CLASS;
-    keywords["else"] = TokenType::ELSE;
-    keywords["false"] = TokenType::FALSE;
-    keywords["for"] = TokenType::FOR;
-    keywords["fun"] = TokenType::FUN;
-    keywords["if"] = TokenType::IF;
-    keywords["nil"] = TokenType::NIL;
-    keywords["or"] = TokenType::OR;
-    keywords["print"] = TokenType::PRINT;
-    keywords["return"] = TokenType::RETURN;
-    keywords["super"] = TokenType::SUPER;
-    keywords["this"] = TokenType::THIS;
-    keywords["true"] = TokenType::TRUE;
-    keywords["var"] = TokenType::VAR;
-    keywords["while"] = TokenType::WHILE;
-  }
-
-  // Main function: Tokens scan karo!
-  // (Main function: Scan those tokens!)
-  std::vector<Token> scanTokens();
 
 private:
   // Helper helper bande (Internal functions)
@@ -86,6 +62,10 @@ private:
   void string();
   void number();
   void identifier();
+
+  // Reserved words di mapping
+  // (Mapping of reserved words)
+  std::map<std::string, TokenType> keywords;
 };
 
 } // namespace lox
