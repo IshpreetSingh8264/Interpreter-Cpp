@@ -10,6 +10,10 @@
 
 namespace lox {
 
+Parser::ParseError::ParseError(const char *msg) : std::runtime_error(msg) {}
+
+Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens) {}
+
 // Main parse function
 std::vector<std::shared_ptr<Stmt>> Parser::parse() {
   std::vector<std::shared_ptr<Stmt>> statements;

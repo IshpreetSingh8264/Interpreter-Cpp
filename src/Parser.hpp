@@ -5,6 +5,7 @@
 #include "Stmt.hpp"
 #include "Token.hpp"
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -14,25 +15,32 @@ namespace lox {
 
 // Parser class: Tokens nu AST (rukh) vich badlan wala
 // (Parser class: The guy converting tokens into an AST (Tree))
+//
+// Layer 2 of the pipeline: Scanner hands it a token vector, it hands the
+// Resolver an AST. It never runs the AST and never sees the source text.
 class Parser {
 public:
   // Error class definition (Standard Lox error exception)
+  //
+  // A parse error is reported on stderr and then thrown so the grammar rules
+  // unwind to the nearest synchronize point in declaration().
   class ParseError : public std::runtime_error {
   public:
-    ParseError(const char *msg) : std::runtime_error(msg) {}
+    explicit ParseError(const char *msg);
   };
 
-  const std::vector<Token> &tokens;
-  int current = 0;
-  bool hadError = false;
-
-  Parser(const std::vector<Token> &tokens) : tokens(tokens) {}
+  explicit Parser(const std::vector<Token> &tokens);
 
   // Main entry: Parse tokens to list of statements
   std::vector<std::shared_ptr<Stmt>> parse();
 
   // For evaluating expressions only (Codecrafters stage 2/3)
   std::shared_ptr<Expr> parseExpression();
+
+  // Borrowed, not owned: the caller's vector has to outlive the Parser.
+  const std::vector<Token> &tokens;
+  int current = 0;
+  bool hadError = false;
 
 private:
   // Grammar Rules (Niyam)
