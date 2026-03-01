@@ -5,6 +5,8 @@
 
 namespace lox {
 
+Resolver::Resolver(Interpreter &interpreter) : interpreter(interpreter) {}
+
 void Resolver::resolve(const std::vector<std::shared_ptr<Stmt>> &statements) {
   for (const auto &stmt : statements) {
     resolve(stmt);

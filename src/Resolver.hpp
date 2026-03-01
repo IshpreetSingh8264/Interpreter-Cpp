@@ -20,6 +20,15 @@ enum class ClassType { NONE, CLASS, SUBCLASS };
 
 // Resolver: Static analysis pass (Rasta labho)
 // (Resolver: Find the path!)
+//
+// Layer 3 of the pipeline. It walks the AST once before anything runs and
+// records, for every variable reference, how many scopes up its binding lives.
+// Those depths are handed to the Interpreter so it can reach a variable with
+// getAt(depth, name) instead of searching the scope chain at runtime.
+//
+// Errors it reports are compile-time only: 'this' outside a class, 'super'
+// outside a subclass, return at top level, a local read in its own
+// initializer, and shadowing in the same scope.
 class Resolver : public ExprVisitor, public StmtVisitor {
   Interpreter &interpreter;
   std::vector<std::map<std::string, bool>> scopes;
@@ -29,7 +38,7 @@ class Resolver : public ExprVisitor, public StmtVisitor {
 public:
   bool hadError = false; // Error flag for compile-time errors
 
-  Resolver(Interpreter &interpreter) : interpreter(interpreter) {}
+  explicit Resolver(Interpreter &interpreter);
 
   void resolve(const std::vector<std::shared_ptr<Stmt>> &statements);
   void resolve(std::shared_ptr<Stmt> stmt);
