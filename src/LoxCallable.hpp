@@ -15,6 +15,15 @@ class Interpreter;
 
 // LoxCallable: Jo vi call ho skda hai (Functions, Classes)
 // (LoxCallable: Anything that can be called, like Functions or Classes)
+//
+// The one interface every callable value in Lox implements, and the reason
+// Interpreter::visitCallExpr can dispatch a call without knowing whether the
+// callee is a LoxFunction, a LoxClass or a native. Adding a native means
+// implementing these three methods; nothing else changes.
+//
+// No .cpp: this header is a pure abstract contract with no out-of-line
+// definition to move. The destructor is defaulted inline, which is the
+// correct choice for a polymorphic base.
 class LoxCallable {
 public:
   virtual int arity() = 0; // Kinne arguments chahiye? (How many args needed?)

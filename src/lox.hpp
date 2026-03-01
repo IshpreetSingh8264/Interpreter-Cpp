@@ -8,6 +8,9 @@
 // forward-declare lox types (LoxCallable.hpp, for example) need exactly that.
 //
 // Do not put logic here. This file is a namespace anchor and nothing else.
+//
+// No .cpp: there is nothing to define. An empty .cpp would be a stub, and a
+// stub is worse than a header with no TU when the header is a declaration.
 namespace lox {}
 
 #endif // LOX_HPP
