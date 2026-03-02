@@ -13,6 +13,7 @@
 #include "Scanner.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
+#include "value.hpp"
 
 #include "lox.hpp"
 
@@ -157,7 +158,7 @@ int main(int argc, char *argv[]) {
       Interpreter interpreter;
       try {
         std::any result = interpreter.evaluate(expression);
-        std::cout << interpreter.stringify(result) << std::endl;
+        std::cout << stringify(result) << std::endl;
       } catch (RuntimeError &error) {
         std::cerr << error.what() << "\n[line " << error.token.line << "]"
                   << std::endl;

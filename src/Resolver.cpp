@@ -188,7 +188,8 @@ std::any Resolver::visitGroupingExpr(Grouping &expr) {
   return std::any();
 }
 
-std::any Resolver::visitLiteralExpr(Literal &expr) { return std::any(); }
+// A literal has no references to resolve.
+std::any Resolver::visitLiteralExpr(Literal & /*expr*/) { return std::any(); }
 
 std::any Resolver::visitLogicalExpr(Logical &expr) {
   resolve(expr.left);
