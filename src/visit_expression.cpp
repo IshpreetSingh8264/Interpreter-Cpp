@@ -181,26 +181,38 @@ std::any Interpreter::visitSetExpr(Set &expr) {
   return value;
 }
 
+// The Resolver binds `this` at a known depth, or reports "Can't use 'this'
+// outside of a class" and stops the program before it runs. Reaching the
+// fallback means the AST reached the tree walker without passing the Resolver,
+// and there is no global named `this` to fall back to anyway.
 std::any Interpreter::visitThisExpr(This &expr) {
   auto it = locals.find(&expr);
-  if (it != locals.end()) {
-    return environment->getAt(it->second, "this");
+  if (it == locals.end()) {
+    throw RuntimeError(expr.keyword, "Can't use 'this' outside of a class.");
   }
-  return globals->get(expr.keyword);
+  return environment->getSlotOrFail(it->second, expr.keyword, "this");
 }
 
+// The Resolver binds `super` only inside a subclass, and reports
+// "Can't use 'super' outside of a class" or "... in a class with no
+// superclass" before the program runs. locals.find() therefore always has an
+// entry here; the guard is what turns a missed entry into that error instead of
+// dereferencing the end iterator.
 std::any Interpreter::visitSuperExpr(Super &expr) {
   // Super di depth labho (Find the depth of super)
   auto it = locals.find(&expr);
+  if (it == locals.end()) {
+    throw RuntimeError(expr.keyword, "Can't use 'super' outside of a class.");
+  }
   int distance = it->second;
 
   // Superclass labho (Get the superclass)
-  std::any superValue = environment->getAt(distance, "super");
-  std::shared_ptr<LoxClass> superclass = asClass(superValue);
+  std::shared_ptr<LoxClass> superclass =
+      asClass(environment->getSlotOrFail(distance, expr.keyword, "super"));
 
   // "this" labho jo ek level upar hai (Get "this" which is one level above)
-  std::any thisValue = environment->getAt(distance - 1, "this");
-  std::shared_ptr<LoxInstance> object = asInstance(thisValue);
+  std::shared_ptr<LoxInstance> object = asInstance(
+      environment->getSlotOrFail(distance - 1, expr.keyword, "this"));
 
   // Superclass vich method labho (Find the method in superclass)
   std::shared_ptr<LoxFunction> method = superclass->findMethod(expr.method.lexeme);
