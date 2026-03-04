@@ -69,8 +69,8 @@ std::shared_ptr<Stmt> Parser::function(std::string kind) {
   std::vector<Token> parameters;
   if (!check(TokenType::RIGHT_PAREN)) {
     do {
-      if (parameters.size() >= 255) {
-        // error(peek(), "Can't have more than 255 parameters.");
+      if (parameters.size() >= kMaxArity) {
+        throw error(peek(), "Can't have more than 255 parameters.");
       }
       parameters.push_back(
           consume(TokenType::IDENTIFIER, "Expect parameter name."));
@@ -369,9 +369,8 @@ std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee) {
   std::vector<std::shared_ptr<Expr>> arguments;
   if (!check(TokenType::RIGHT_PAREN)) {
     do {
-      if (arguments.size() >= 255) {
-        // error(peek(), "Can't have more than 255 arguments.");
-        // For simplicity just ignore or print
+      if (arguments.size() >= kMaxArity) {
+        throw error(peek(), "Can't have more than 255 arguments.");
       }
       arguments.push_back(expression());
     } while (match({TokenType::COMMA}));

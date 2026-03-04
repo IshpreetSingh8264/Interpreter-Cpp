@@ -20,6 +20,10 @@ namespace lox {
 // Resolver an AST. It never runs the AST and never sees the source text.
 class Parser {
 public:
+  // The book's cap on parameter and argument lists. Exceeding it was a
+  // commented-out error call in both grammar rules, so nothing enforced it.
+  static constexpr size_t kMaxArity = 255;
+
   // Error class definition (Standard Lox error exception)
   //
   // A parse error is reported on stderr and then thrown so the grammar rules
