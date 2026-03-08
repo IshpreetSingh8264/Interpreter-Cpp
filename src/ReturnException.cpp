@@ -4,7 +4,7 @@
 
 namespace lox {
 
-ReturnException::ReturnException(std::any value)
-    : std::runtime_error(""), value(std::move(value)) {}
+ReturnException::ReturnException(std::any value, Token token)
+    : std::runtime_error(""), value(std::move(value)), token(std::move(token)) {}
 
 } // namespace lox

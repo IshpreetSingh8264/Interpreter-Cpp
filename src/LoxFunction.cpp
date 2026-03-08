@@ -43,10 +43,18 @@ std::any LoxFunction::call(Interpreter &interpreter,
   try {
     interpreter.executeBlock(declaration.body, environment);
   } catch (ReturnException &returnValue) {
-    // Agar initializer hai te return layi bhi "this" return karo
-    // (If it's an initializer, return "this" even for return statements)
     if (isInitializer) {
-      return closure->getAt(0, "this");
+      // A bare `return;` in an initializer is legal and yields the instance. A
+      // `return <value>;` is not, and the Resolver reports it - but the
+      // Resolver does not run on the evaluate path, and it is the only thing
+      // standing between `return 1;` and silently returning the instance and
+      // dropping the value on the floor. Checking here too means the rule
+      // holds however this function got called.
+      if (returnValue.value.has_value()) {
+        throw RuntimeError(returnValue.token,
+                           "Can't return a value from an initializer.");
+      }
+      return thisInstance();
     }
     return returnValue.value;
   }
@@ -54,10 +62,17 @@ std::any LoxFunction::call(Interpreter &interpreter,
   // Agar initializer hai te "this" return karo
   // (If it's an initializer, return "this")
   if (isInitializer) {
-    return closure->getAt(0, "this");
+    return thisInstance();
   }
 
   return std::any(); // nil return if no return statement
+}
+
+// An initializer's value is the instance it ran on, which bind() put at
+// distance 0 of the closure. getSlotOrFail rather than getAt because a missing
+// `this` here is the interpreter losing track, not nil.
+std::any LoxFunction::thisInstance() const {
+  return closure->getSlotOrFail(0, declaration.name, "this");
 }
 
 bool LoxFunction::getIsInitializer() const { return isInitializer; }

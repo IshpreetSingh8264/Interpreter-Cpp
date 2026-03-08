@@ -81,9 +81,10 @@ std::any Interpreter::visitReturnStmt(Return &stmt) {
     value = evaluate(stmt.value);
   }
 
-  // Unwind to the nearest LoxFunction::call. The Resolver has already rejected
+  // Unwind to the nearest LoxFunction::call, carrying the keyword so an error
+  // raised on the way out can name the line. The Resolver has already rejected
   // a return outside a function, so the catch there is always reachable.
-  throw ReturnException(std::move(value));
+  throw ReturnException(std::move(value), stmt.keyword);
 }
 
 std::any Interpreter::visitClassStmt(Class &stmt) {

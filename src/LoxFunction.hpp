@@ -39,6 +39,11 @@ public:
 
   bool getIsInitializer() const;
   std::string toString() override;
+
+private:
+  // The instance an initializer returns: the `this` bind() put at distance 0 of
+  // the closure.
+  std::any thisInstance() const;
 };
 
 } // namespace lox
