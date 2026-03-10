@@ -40,7 +40,11 @@ std::any Interpreter::visitUnaryExpr(Unary &expr) {
     requireNumber(expr.op, right);
     return -asNumber(right);
   default:
-    return std::any(); // Should not happen
+    // The parser only ever builds a Unary for `!` and `-`. Reaching this means
+    // the grammar and this switch disagree, which is an interpreter bug, not a
+    // program error. Returning nil instead would let it reach `print` and
+    // surface as the value "nil".
+    throw RuntimeError(expr.op, "Invalid unary operator.");
   }
 }
 
@@ -85,7 +89,9 @@ std::any Interpreter::visitBinaryExpr(Binary &expr) {
     requireNumbers(expr.op, left, right);
     return asNumber(left) * asNumber(right);
   default:
-    return std::any();
+    // Same reasoning as visitUnaryExpr: the grammar cannot produce this, so a
+    // mismatch is an interpreter bug and must not read as nil.
+    throw RuntimeError(expr.op, "Invalid binary operator.");
   }
 }
 
