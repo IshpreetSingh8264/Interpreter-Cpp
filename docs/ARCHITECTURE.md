@@ -34,13 +34,23 @@ graph TB
         K[LoxFunction]
         L[LoxClass]
         M[LoxInstance]
+        N[value - truthiness,<br/>equality, printing]
     end
     
     H <--> J
     H <--> K
     H <--> L
     H <--> M
+    H <--> N
 ```
+
+A unidirectional pipeline: each layer calls only the one below it. `text →
+tokens → tree → output`, and the data crossing each boundary is a plain value.
+The Scanner never sees an `Expr`; the Resolver runs nothing; the Interpreter
+never sees source text or a token.
+
+The `Runtime Support` box is not a fifth layer. It is the object model the
+backend executes against, and the backend is the only thing that touches it.
 
 ---
 
@@ -127,29 +137,94 @@ flowchart LR
 
 **Purpose**: Executes the AST using the visitor pattern.
 
-**Files**: `Interpreter.hpp`, `Interpreter.cpp`
+**Files**: `Interpreter.hpp` (contract), `Interpreter.cpp` (core),
+`visit_expression.cpp` (12 `ExprVisitor` bodies),
+`visit_statement.cpp` (9 `StmtVisitor` bodies)
+
+The header is the whole public surface: `globals`, `environment`, `locals`, and
+21 virtual overrides. The implementation is split by concern, so no single file
+holds all of it.
 
 ```mermaid
 flowchart TB
-    subgraph "Visitor Pattern"
-        A[Interpreter] --> B[visitBinaryExpr]
-        A --> C[visitPrintStmt]
-        A --> D[visitVarStmt]
-        A --> E[visitFunctionStmt]
-        A --> F[visitClassStmt]
+    subgraph "Interpreter.cpp - core"
+        A[Interpreter] --> A1[constructor + installNatives]
+        A --> A2[interpret / evaluate / execute]
+        A --> A3[executeBlock - scope switch]
     end
-    
+
+    subgraph "Visitor bodies"
+        B[visit_expression.cpp - 12 Expr methods]
+        C[visit_statement.cpp - 9 Stmt methods]
+    end
+
+    A2 --> B
+    A2 --> C
+    A3 --> C
+
     subgraph "Runtime"
         G[Environment]
         H[globals]
+        V[value.cpp - truthiness, equality, printing]
     end
-    
-    B & C & D & E & F --> G
+
+    B & C --> G
+    B & C --> V
 ```
+
+**Division of labour**:
+- `executeBlock` owns the current scope. It swaps `environment`, runs the
+  statements, and restores the previous scope even when a statement unwinds
+  through it — that is how `return` gets out of nested blocks.
+- The `visit*` methods never touch `environment` directly for scoping. They read
+  and write bindings through it at a depth the Resolver already computed.
+- Value questions go to `value.cpp`, not to the walker.
 
 ---
 
-### 5. Environment
+### 5. value — what a Lox value is
+
+**Purpose**: The single place that answers "what is this `std::any`?".
+
+**Files**: `value.hpp`, `value.cpp`
+
+Lox has no tagged union. A runtime value is a `std::any` holding one of: nil (an
+empty `std::any`), `bool`, `double`, `std::string`, or a `shared_ptr` to
+`LoxClass`, `LoxInstance` or `LoxFunction`. Natives are held as a
+`shared_ptr<LoxCallable>`.
+
+```mermaid
+flowchart LR
+    A["std::any"] --> B[isNumber / isString / isBool]
+    A --> C["asNumber / asString / asBool"]
+    A --> D["isTruthy / isEqual / stringify"]
+    A --> E[requireNumber / requireNumbers]
+```
+
+Before this was its own module, five helpers were private members of
+`Interpreter` even though none of them touched `this->`. Keeping them here means
+"can this be truthy", "are these equal" and "how does this print" have one
+answer each, and a new caller cannot invent a fourth.
+
+`stringify`'s unknown-type path throws. It used to return the string
+`"unknown"`, which would have printed a plausible-looking word for a bug in the
+interpreter.
+
+---
+
+### 6. natives
+
+**Purpose**: Installs the built-in functions into the global environment.
+
+**Files**: `natives.hpp`, `natives.cpp`
+
+`installNatives(Environment&)` is the whole registry. `Clock` lives in an
+anonymous namespace in the `.cpp`, so adding a native is one class plus one
+`globals.define` line — the parser, resolver and tree walker need no change.
+
+---
+
+### 7. Environment
 
 **Purpose**: Stores variables in a scoped chain.
 
@@ -169,10 +244,21 @@ graph TB
 - `enclosing` pointer forms a linked list of scopes
 - `getAt(distance, name)` for resolved variable lookup
 - `ancestor(distance)` for scope hopping
+- `getSlotOrFail(distance, token, slot)` for the interpreter's own slots (`this`,
+  `super`)
+
+**Why two lookup functions.** `getAt`/`assignAt` run on every variable read and
+assume the distance is in range, because the Resolver proved the slot exists. A
+miss there would be an interpreter bug, and checking on the hot path would cost
+every read in the program. `getSlotOrFail` is for `this` and `super`, where a
+miss means the interpreter lost track of the scope chain rather than that the
+program is wrong. It walks the chain itself instead of using `ancestor` — which
+assumes the distance is in range and would dereference a null `enclosing` — and
+throws a located error instead of letting `map::operator[]` insert an empty `any`.
 
 ---
 
-### 6. LoxCallable Hierarchy
+### 8. LoxCallable Hierarchy
 
 ```mermaid
 classDiagram
@@ -206,9 +292,14 @@ classDiagram
     LoxCallable <|-- LoxClass
 ```
 
+`LoxCallable` is why `visitCallExpr` can dispatch a call without knowing which
+kind of callable it got. `NativeClock` is not a separate public type — it is a
+class in an anonymous namespace inside `natives.cpp`, reachable only as a
+`shared_ptr<LoxCallable>`.
+
 ---
 
-### 7. Inheritance Model
+### 9. Inheritance Model
 
 ```mermaid
 flowchart TB
@@ -222,11 +313,18 @@ flowchart TB
     end
 ```
 
-**super Keyword Execution**:
-1. Get `super` from environment at resolved distance
-2. Get `this` from one level above `super`
-3. Find method in superclass
-4. Bind method to current instance
+**super Keyword Execution** (`visitSuperExpr`):
+1. Look up the `Super` node in `locals`. Absent means the Resolver never
+   annotated it, so throw "Can't use 'super' outside of a class". The lookup is
+   checked: this function used to dereference `end()` and segfault.
+2. Get `super` at the resolved distance via `getSlotOrFail`
+3. Get `this` at `distance - 1` via `getSlotOrFail`
+4. Find the method in the superclass, walking up the chain
+5. Bind the method to the current instance
+
+Both slot reads use `getSlotOrFail`, so a `this` that is not where the Resolver
+said it would be is a reported error rather than a nil that surfaces later as a
+segfault in `method->bind`.
 
 ---
 
@@ -238,24 +336,38 @@ graph TD
     main --> Parser
     main --> Resolver
     main --> Interpreter
-    
+    main --> AstPrinter
+
     Parser --> Expr
     Parser --> Stmt
     Parser --> Token
-    
+
+    AstPrinter --> Expr
+
     Resolver --> Interpreter
     Resolver --> Stmt
     Resolver --> Expr
-    
+
     Interpreter --> Environment
     Interpreter --> LoxFunction
     Interpreter --> LoxClass
     Interpreter --> LoxInstance
-    
+    Interpreter --> value
+    Interpreter --> natives
+
+    visit_expression --> value
+    visit_statement --> value
+
     LoxFunction --> Environment
     LoxClass --> LoxFunction
     LoxInstance --> LoxClass
 ```
+
+Two arrows point *back up* here, and both are the object model rather than the
+pipeline: `LoxCallable` forward-declares `lox::Interpreter` because `call()`
+receives one, and `LoxInstance` forward-declares `lox::LoxClass` because it
+holds one. Neither is a layer reaching backwards — the data flow
+`text → tokens → tree → output` is strictly downward.
 
 ---
 
@@ -266,32 +378,38 @@ The interpreter uses `std::shared_ptr` extensively:
 - **AST nodes** - Shared ownership during parsing and interpretation
 - **LoxClass/LoxInstance** - Instances reference their class
 
+`Interpreter::locals` is a `std::map<Expr*, int>` keyed by raw pointer, which
+means the AST has to outlive the map. It does: the statements vector is owned by
+`main` and lives for the whole run.
+
 ---
 
 ## 🎭 Visitor Pattern
 
-Both `Expr` and `Stmt` use the visitor pattern:
+Both `Expr` and `Stmt` use the visitor pattern. Every `visit*` is pure virtual,
+so a new node type is a compile error until every visitor implements it — which
+is the mechanism that stopped the `parse` command from printing `"unknown"`.
 
 ```cpp
-// Base class defines accept
+// Base class declares the dispatch. The body lives in Expr.cpp / Stmt.cpp, not
+// in the header, so the header stays a pure contract.
 class Expr {
     virtual std::any accept(ExprVisitor& visitor) = 0;
 };
 
-// Each subclass implements accept
 class Binary : public Expr {
-    std::any accept(ExprVisitor& visitor) override {
-        return visitor.visitBinaryExpr(*this);
-    }
+    std::any accept(ExprVisitor& visitor) override;
 };
 
-// Interpreter implements visitor
-class Interpreter : public ExprVisitor, public StmtVisitor {
-    std::any visitBinaryExpr(Binary& expr) override {
-        // Evaluate binary expression
-    }
-};
+// Three visitors implement the same two interfaces:
+//   Interpreter  - runs the program        (split across 3 .cpp files)
+//   Resolver     - computes scope depths  (Resolver.cpp)
+//   AstPrinter   - renders it as text     (AstPrinter.cpp)
 ```
+
+There are three visitors, not one, and that is the point of the pattern here: the
+tree walk, the scope analysis and the text rendering are separate concerns over
+one AST shape, and adding a node forces all three to be updated.
 
 ---
 

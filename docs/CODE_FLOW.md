@@ -2,22 +2,33 @@
 
 This document explains how code flows through the Lox interpreter from source to output.
 
+Every declaration in the project lives in `namespace lox`. `main` is the one
+exception, because it has to be at global scope.
+
 ---
 
 ## 📍 Entry Point
 
 ### main.cpp
 
-The entry point dispatches to different modes:
+`main` does three things: unbuffer the streams, read `argv[1]`, dispatch. It holds
+no domain logic — the AST printer that used to live here is now `AstPrinter.cpp`
+and the value formatting is in `value.cpp`.
 
 ```mermaid
 flowchart TD
     A[main.cpp] --> B{command}
     B -->|tokenize| C[Scanner only]
-    B -->|parse| D[Scanner + Parser]
-    B -->|evaluate| E[Scanner + Parser + Interpreter - Single expression]
-    B -->|run| F[Full Pipeline - Scanner -> Parser -> Resolver -> Interpreter]
+    B -->|parse| D[Scanner + Parser + AstPrinter]
+    B -->|evaluate| E[Scanner + Parser + Interpreter<br/>NO Resolver]
+    B -->|run| F[Full Pipeline<br/>Scanner -> Parser -> Resolver -> Interpreter]
 ```
+
+`evaluate` skips the Resolver, which matters for error handling: the Resolver's
+compile-time rules (`this` outside a class, a value returned from an
+initializer) are not enforced on that path, so the runtime checks in
+`visitThisExpr`, `visitSuperExpr` and `LoxFunction::call` have to stand on their
+own. They do.
 
 ---
 
@@ -72,7 +83,7 @@ sequenceDiagram
 
 ## 📝 Phase 1: Scanning (Lexical Analysis)
 
-**File**: `Scanner.hpp`, `Scanner.cpp`
+**Files**: `Scanner.hpp`, `Scanner.cpp`, `Token.hpp`, `Token.cpp`, `TokenType.hpp`, `TokenType.cpp`
 
 ### Input → Output
 
@@ -107,7 +118,10 @@ flowchart TB
 
 ## 📝 Phase 2: Parsing (Syntax Analysis)
 
-**Files**: `Parser.hpp`, `Parser.cpp`, `Expr.hpp`, `Stmt.hpp`
+**Files**: `Parser.hpp`, `Parser.cpp`, `Expr.hpp`, `Expr.cpp`, `Stmt.hpp`, `Stmt.cpp`, `AstPrinter.hpp`, `AstPrinter.cpp`
+
+`Parser::kMaxArity` (255) caps both parameter and argument lists. Both checks used
+to be commented-out `error()` calls, so the limit was tested and then discarded.
 
 ### Grammar Hierarchy
 
@@ -183,7 +197,8 @@ flowchart LR
 
 ## 📝 Phase 4: Interpretation (Execution)
 
-**Files**: `Interpreter.hpp`, `Interpreter.cpp`
+**Files**: `Interpreter.hpp` (contract), `Interpreter.cpp` (core),
+`visit_expression.cpp`, `visit_statement.cpp`, `value.cpp`, `natives.cpp`
 
 ### Visitor Pattern Execution
 
@@ -201,8 +216,25 @@ flowchart TB
     D -->|Return| K[visitReturnStmt]
   
     E --> L[evaluate expression]
-    L --> M[print stringify result]
+    L --> M["value::stringify(result)"]
+
+    subgraph "where each piece lives"
+        N["Interpreter.cpp<br/>interpret / evaluate / execute<br/>executeBlock"]
+        VE["visit_expression.cpp<br/>12 Expr bodies"]
+        VS["visit_statement.cpp<br/>9 Stmt bodies"]
+        V["value.cpp<br/>truthiness, equality, printing"]
+    end
+
+    N --> VE
+    N --> VS
+    VE --> V
+    VS --> V
 ```
+
+Expression bodies never change the current scope. Statement bodies do, and they
+all do it through `executeBlock`, which saves `environment`, swaps in the new
+one, runs, and restores it even when a statement unwinds. That restore-on-throw
+is what lets `return` escape from inside a nested block.
 
 ---
 
@@ -240,6 +272,21 @@ auto it = locals.find(&expr);
 if (it != locals.end()) {
     return environment->getAt(it->second, name);
 }
+```
+
+`locals` is filled in by the Resolver before anything runs, keyed by `Expr*`.
+A node absent from the map is a global. Every `locals.find` result is checked
+against `end()` — `visitSuperExpr` used to skip that check and segfault when the
+`super` expression had not been annotated.
+
+For the interpreter's own slots the read is `getSlotOrFail`, which throws a
+located error on a miss instead of letting `map::operator[]` insert an empty
+`any`:
+
+```cpp
+// `this` and `super` are created by the interpreter, not the program, so a
+// miss means it lost track of the scope chain.
+return environment->getSlotOrFail(distance, expr.keyword, "super");
 ```
 
 ---
@@ -378,14 +425,46 @@ flowchart TB
 
 ## 🔚 Error Handling Flow
 
+Three kinds of error, three exit codes. The CodeCrafters harness checks the code
+and matches the message text literally, so both are part of the contract.
+
 ```mermaid
 flowchart TB
     A[Error Detected] --> B{Error Type}
     B -->|Scan Error| C[Set hasError flag]
     B -->|Parse Error| D[Throw ParseError]
+    B -->|Resolve Error| R[Set hadError flag]
     B -->|Runtime Error| E[Throw RuntimeError]
+    B -->|Unreachable| U[Throw - never return nil]
   
     C --> F[Continue scanning<br>Report at end]
     D --> G[synchronize<br>Skip to next statement]
-    E --> H[Catch in main<br>Print error<br>Exit with code 70]
+    R --> S[Keep walking<br>Report at end]
+    E --> H[Catch in main<br>Print message + line<br>Exit 70]
+    U --> H
+
+    C --> X[main returns 65]
+    D --> X
+    R --> X
 ```
+
+**Streams.** Diagnostics go to stderr; program output and `print` go to stdout.
+The harness compares them separately *and* their interleaving, so a diagnostic
+printed to stdout, or a `print` sent to stderr, fails a stage.
+
+**Two rules for new errors.**
+
+1. Pass the token the message should point at. `RuntimeError` prints `[line N]`
+   from that token and the harness checks the number. For a binary operator that
+   is the operator token, not an operand.
+2. The unreachable branch throws. Returning an empty `std::any` from
+   `visitUnaryExpr` or `visitBinaryExpr`, or the string `"unknown"` from
+   `stringify`, produces output that looks like a valid program result and hides
+   the bug underneath. Both now throw.
+
+**Scope-lookup safety.** `Environment` has two lookup paths. `getAt`/`assignAt`
+are unchecked because the Resolver proved the slot exists and they run on every
+variable read. `getSlotOrFail` is checked and used for `this` and `super`, where
+a miss means the interpreter lost track of the scope chain. It walks the chain
+itself rather than through `ancestor()`, which assumes the distance is in range
+and dereferences a null `enclosing` past the end.

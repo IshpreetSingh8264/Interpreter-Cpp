@@ -1,0 +1,53 @@
+// Inheritance: method lookup, overriding, super.method, super.init, and the
+// runtime error when the superclass expression is not a class.
+class A {
+  method() { return "A.method"; }
+  identify() { return "A"; }
+  init() { this.tag = "from A"; }
+  greet() { return "A greets"; }
+}
+
+class B < A {
+  method() { return "B.method -> " + super.method(); }
+  identify() { return "B"; }
+}
+
+class C < B {}
+
+print A().method();
+print B().method();
+print C().method();
+
+// An override without super still wins, even through a grandchild.
+print A().identify();
+print B().identify();
+print C().identify();
+
+// Inherited initializer, then overridden initializer calling super.init().
+// `+` is two numbers or two strings and never mixed, so the coordinates
+// are kept as strings here.
+class Point { init(x, y) { this.x = x; this.y = y; } show() { return this.x + "," + this.y; } }
+class Point3D < Point {
+  init(x, y, z) {
+    super.init(x, y);
+    this.z = z;
+  }
+  show() { return super.show() + "," + this.z; }
+}
+print Point("1", "2").show();
+print Point3D("1", "2", "3").show();
+
+// `super` in a nested block inside a method.
+class Outer {
+  m() { { print "outer via super"; } }
+}
+class Inner < Outer {
+  m() { { super.m(); } }
+}
+Inner().m();
+
+// A class can only inherit from a class. This is a runtime error, because the
+// superclass expression is evaluated when the class statement runs.
+var NotAClass = "just a string";
+class Bad < NotAClass {}
+print Bad();

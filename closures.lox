@@ -1,0 +1,60 @@
+// Closures, scope, and higher-order functions.
+var a = "global";
+{
+  var a = "block";
+  print a;
+}
+print a;
+
+fun makeCounter() {
+  var count = 0;
+  fun inc() {
+    count = count + 1;
+    return count;
+  }
+  return inc;
+}
+var c1 = makeCounter();
+var c2 = makeCounter();
+print c1();
+print c1();
+print c2();
+
+fun outer() {
+  var x = "outer";
+  fun middle() {
+    var y = "middle";
+    fun inner() {
+      return x + "/" + y;
+    }
+    return inner;
+  }
+  return middle();
+}
+print outer()();
+
+fun apply(fn, value) { return fn(value); }
+fun double(n) { return n * 2; }
+print apply(double, 21);
+
+// Two closures over the same variable see each other's writes.
+// Lox has no arrays, so the pair is returned as a function that takes a
+// selector name - still enough to prove the shared cell is the same cell.
+fun makePair() {
+  var n = 0;
+  fun up() { n = n + 1; return n; }
+  fun down() { n = n - 1; return n; }
+  fun read() { return n; }
+  fun select(which) {
+    if (which == "up") return up;
+    if (which == "down") return down;
+    return read;
+  }
+  return select;
+}
+// makePair returns select itself, so no extra call: select takes one argument.
+var select = makePair();
+print select("up")();
+print select("up")();
+print select("down")();
+print select("read")();

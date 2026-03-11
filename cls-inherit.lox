@@ -1,0 +1,53 @@
+// Classes: declarations, instances, methods, fields, initializers, `this`.
+class Dev {
+  getName() { return "ish"; }
+}
+
+class DevWithAge {
+  init(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  // Lox `+` is two numbers or two strings, never mixed, so age is a string.
+  getName() { return this.name; }
+  getAge() { return this.age; }
+  describe() {
+    return this.name + " is " + this.age;
+  }
+}
+
+class Counter {
+  init() { this.count = 0; }
+  bump() { this.count = this.count + 1; return this.count; }
+}
+
+var d = Dev();
+print d.getName();
+
+var p = DevWithAge("ish", "30");
+print p.getName();
+print p.getAge();
+print p.describe();
+
+var c = Counter();
+print c.bump();
+print c.bump();
+print c.bump();
+
+print Dev;
+print Dev();
+
+// Getters and setters share a field.
+class Bacon {
+  myFavField() { return this.field; }
+  setFavField(v) { this.field = v; }
+}
+var b = Bacon();
+b.setFavField("field");
+print b.myFavField();
+
+// A bare `return;` in an initializer is legal and yields the instance.
+class Made {
+  init() { print "constructing"; return; }
+}
+print Made();
