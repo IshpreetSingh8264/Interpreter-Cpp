@@ -214,8 +214,14 @@ scope.
 ## Verifying a change
 
 ```sh
-# build + the 85-case local smoke suite
-bash /tmp/opencode/bd.sh          # if the harness scripts are available
+# the local gate: build + 415 cases (85 hand-written + 330 from the tester).
+# Runs in seconds, no network.
+./tests/run.sh
+
+# narrow it
+./tests/run.sh unit inh-super      # one area of the smoke suite
+./tests/run.sh corpus IB9          # one CodeCrafters stage
+ctest --test-dir build --output-on-failure   # if you prefer ctest
 
 # the real gate
 ./your_program.sh run script.lox
@@ -223,4 +229,7 @@ codecrafters test                 # must report all 84 stages passing
 ```
 
 `codecrafters test` is the only authority. It takes a couple of minutes because
-it rebuilds remotely.
+it rebuilds remotely. `tests/run.sh` is a fast local proxy derived from a
+snapshot of that same tester — it exists to catch a regression in one second
+instead of in three, not to replace the gate. **Read `tests/README.md` before
+you trust a green run**: it lists exactly what these suites do not cover.
