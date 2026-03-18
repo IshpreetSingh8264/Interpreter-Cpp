@@ -357,11 +357,11 @@ sequenceDiagram
     I->>I: visitSuperExpr
   
     Note over I: Get distance from<br>resolver's locals
-    I->>E: getAt(distance, "super")
+    I->>E: getSlotOrFail(distance, "super")
     E-->>I: superclass
   
     Note over I: Get this from one<br>level above
-    I->>E: getAt(distance-1, "this")
+    I->>E: getSlotOrFail(distance-1, "this")
     E-->>I: instance
   
     I->>Super: findMethod("methodName")
@@ -449,8 +449,11 @@ flowchart TB
 ```
 
 **Streams.** Diagnostics go to stderr; program output and `print` go to stdout.
-The harness compares them separately *and* their interleaving, so a diagnostic
-printed to stdout, or a `print` sent to stderr, fails a stage.
+The harness compares the two **merged**, not separately and not interleaved — so
+putting a diagnostic on stdout, or a `print` on stderr, does not by itself fail a
+stage. `tests/corpus/run_corpus.py` records 32 of the 330 corpus cases whose
+stream attribution differs from the fixture, and they pass; see the `--strict-streams`
+mode described in `tests/README.md` for the diagnostic view.
 
 **Two rules for new errors.**
 

@@ -47,21 +47,21 @@ interpreter. Every case pins the exact stdout, the exact exit code, and — for
 error paths — a substring of stderr. The five commands are exercised in
 proportion to their surface area:
 
-- **scanning** (6) — every single-character token, all two-character
-  operators, string/number literals, all 17 keywords, an unterminated string,
+- **scanning** (7) — every single-character token, all two-character
+  operators, string/number literals, all 16 keywords, an unterminated string,
   and a `#` that is *not* a comment.
-- **parsing** (20) — the AST printer for literals, unary/binary/grouping,
+- **parsing** (24) — the AST printer for literals, unary/binary/grouping,
   logical operator precedence, calls, the full get/set chain shape, `this`,
-  and `super`, plus two syntax errors.
-- **evaluation** (15) — arithmetic, string concatenation, truthiness, the
+  and `super`, plus syntax errors.
+- **evaluation** (13) — arithmetic, string concatenation, truthiness, the
   numeric/static type checks, and equality across types.
-- **running** (17) — block scoping and shadowing, the "can't read a local in
+- **running** (16) — block scoping and shadowing, the "can't read a local in
   its own initializer" rule, control flow, `and`/`or` short-circuiting,
   undefined variables, and the top-level `return` rejection.
-- **functions** (8) — arity checking, closures capturing and mutating an
+- **functions** (7) — arity checking, closures capturing and mutating an
   upvalue, scope shadowing around a function body, the `clock` native,
   calling a non-callable, and function stringification.
-- **classes and inheritance** (19) — declaration, instances, `toString`,
+- **classes and inheritance** (18) — declaration, instances, `toString`,
   `init`, getter/setter methods, `this` outside a class, a bare `return` from
   an initializer, `return <value>` from an initializer being rejected, and
   method lookup, overriding, `super.method`, `super.init`, self-inheritance,

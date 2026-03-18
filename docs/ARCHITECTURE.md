@@ -71,7 +71,7 @@ flowchart LR
 **Key Methods**:
 - `scanTokens()` - Main entry, returns `vector<Token>`
 - `scanToken()` - Scans a single token
-- `string_()` - Handles string literals
+- `string()` - Handles string literals
 - `number()` - Handles numeric literals
 - `identifier()` - Handles identifiers and keywords
 
@@ -79,7 +79,8 @@ flowchart LR
 
 ### 2. Parser
 
-**Purpose**: Builds an Abstract Syntax Tree (AST) from tokens using recursive descent.
+**Purpose**: Builds an Abstract Syntax Tree (AST) from tokens using recursive descent
+with a hand-written precedence chain. There is no Nud/Led table in this codebase.
 
 **Files**: `Parser.hpp`, `Parser.cpp`, `Expr.hpp`, `Stmt.hpp`
 
@@ -89,7 +90,7 @@ flowchart TB
         A[program] --> B[declaration*]
         B --> C[varDecl / funDecl / classDecl / statement]
         C --> D[expression]
-        D --> E[equality → comparison → term → factor → unary → primary]
+        D --> E[assignment → orExpr → andExpr → equality → comparison<br/>→ term → factor → unary → call → primary]
     end
 ```
 
@@ -108,6 +109,7 @@ flowchart TB
 | `Set` | `obj.property = value` |
 | `This` | `this` keyword |
 | `Super` | `super.method` |
+| `Logical` | `a and b`, `a or b` |
 
 ---
 
@@ -269,7 +271,7 @@ classDiagram
         +string toString()
     }
     
-    class NativeClock {
+    class Clock {
         +int arity() = 0
         +any call() = current_time
     }
@@ -287,13 +289,13 @@ classDiagram
         +LoxFunction findMethod(string)
     }
     
-    LoxCallable <|-- NativeClock
+    LoxCallable <|-- Clock
     LoxCallable <|-- LoxFunction
     LoxCallable <|-- LoxClass
 ```
 
 `LoxCallable` is why `visitCallExpr` can dispatch a call without knowing which
-kind of callable it got. `NativeClock` is not a separate public type — it is a
+kind of callable it got. `Clock` is not a separate public type — it is a
 class in an anonymous namespace inside `natives.cpp`, reachable only as a
 `shared_ptr<LoxCallable>`.
 
@@ -407,9 +409,11 @@ class Binary : public Expr {
 //   AstPrinter   - renders it as text     (AstPrinter.cpp)
 ```
 
-There are three visitors, not one, and that is the point of the pattern here: the
+There are three classes over the same tree, and that is the point of the pattern here: the
 tree walk, the scope analysis and the text rendering are separate concerns over
-one AST shape, and adding a node forces all three to be updated.
+one AST shape, and adding a node forces all three to be updated. `AstPrinter`
+implements only `ExprVisitor`, so a new *statement* node only forces updates to
+the resolver and the interpreter.
 
 ---
 

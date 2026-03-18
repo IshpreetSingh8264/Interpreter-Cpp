@@ -141,8 +141,11 @@ unify them.
 - **Exit codes are part of the contract.** `0` success, `65` lexical/parse/
   resolve error, `70` runtime error, `1` usage error. The harness checks them.
 - **Stream contract.** Program output and `print` go to stdout. Diagnostics go
-  to stderr. The harness compares both separately, and it also compares the
-  interleaving, so do not reorder or buffer.
+  to stderr. The harness compares the two **merged**, not separately and not
+  interleaved, so stream placement alone does not fail a stage. Use
+  `tests/corpus/run_corpus.py --strict-streams` when you want per-stream drift
+  reported: 32 of the 330 corpus cases sit on a different stream than the
+  original fixture recorded.
 - **Error message text is part of the contract.** The harness matches it
   literally, including the `[line N]` suffix. Change a message only if a stage
   tells you to.
